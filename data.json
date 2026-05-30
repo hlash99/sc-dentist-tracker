@@ -1,0 +1,21 @@
+{
+  "ourPractice": "Loomis & McFarlane Dental Care",
+  "source": "Google Maps — search: \"dentist San Carlos CA\" (category: Dentist / general practice only)",
+  "snapshots": [
+    {
+      "date": "2026-05-30",
+      "dentists": [
+        { "name": "Frank Hsu, DDS", "reviews": 259, "rating": 4.9 },
+        { "name": "Avalon Dental – Dr. Elizabeth Dinh", "reviews": 138, "rating": 4.9 },
+        { "name": "Yenba Bui Sing, DMD", "reviews": 106, "rating": 5.0 },
+        { "name": "Valerie Gilman, DDS – San Carlos", "reviews": 97, "rating": 4.9 },
+        { "name": "Klebaner Alek DDS", "reviews": 84, "rating": 5.0 },
+        { "name": "Chestnut Dental Care", "reviews": 82, "rating": 5.0 },
+        { "name": "Held and Lau DDS", "reviews": 79, "rating": 4.9 },
+        { "name": "Loomis & McFarlane Dental Care", "reviews": 68, "rating": 5.0 },
+        { "name": "Chow & Ysaac Family Dentistry", "reviews": 25, "rating": 5.0 },
+        { "name": "Laurel Dental San Carlos", "reviews": 10, "rating": 4.6 }
+      ]
+    }
+  ]
+}

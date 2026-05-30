@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>San Carlos Dentist Review Tracker</title>
+<style>
+  :root{
+    --bg:#0d1b2a; --panel:#16263a; --ink:#e9f1fb; --muted:#9fb3c8;
+    --gold:#ffd34d; --teal:#3ec9c4; --us:#ff7a59; --usbg:rgba(255,122,89,.14);
+    --line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%,#1b3a5b 0%,var(--bg) 55%); color:var(--ink);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:28px 20px 80px}
+  header h1{font-size:1.9rem;margin:0 0 4px;letter-spacing:-.02em}
+  header p{color:var(--muted);margin:0;font-size:.95rem}
+  .updated{font-size:.8rem;color:var(--muted);margin-top:6px}
+
+  .hero{
+    margin:26px 0; padding:22px 24px; border-radius:18px;
+    background:linear-gradient(135deg,#16314d,#102236); border:1px solid var(--line);
+    position:relative; overflow:hidden;
+  }
+  .hero .rankbig{font-size:3.2rem;font-weight:800;line-height:1;margin:0}
+  .hero .rankbig small{font-size:1.1rem;color:var(--muted);font-weight:600}
+  .hero .msg{font-size:1.15rem;margin:10px 0 16px;font-weight:600}
+  .meter{height:14px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;border:1px solid var(--line)}
+  .meter > i{display:block;height:100%;background:linear-gradient(90deg,var(--us),var(--gold));border-radius:99px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+  .meter-label{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:8px}
+
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.96rem}
+  th,td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.us{background:var(--usbg)}
+  tr.us td{font-weight:700}
+  .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--us);color:#1a0d08;margin-left:8px;vertical-align:middle}
+  .rankcell{font-weight:700;color:var(--muted)}
+  tr.us .rankcell{color:var(--us)}
+  .medal{font-size:1.05rem}
+  .stars{color:var(--gold);font-size:.82rem}
+
+  .panel{margin-top:30px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .panel h2{font-size:1.05rem;margin:0 0 14px}
+  canvas#trend{width:100%;height:220px;display:block}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:99px;display:inline-block}
+
+  footer{margin-top:36px;font-size:.78rem;color:var(--muted);line-height:1.6}
+  footer a{color:var(--teal)}
+  canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+  .single-note{color:var(--muted);font-size:.85rem;margin-top:8px}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+  <header>
+    <h1>🦷 San Carlos GP Dentist Review Tracker</h1>
+    <p>Google review counts for general-practice dentists in San Carlos, CA — most to least.</p>
+    <div class="updated" id="updated"></div>
+  </header>
+
+  <section class="hero" id="hero">
+    <p class="rankbig" id="rankbig">—</p>
+    <p class="msg" id="msg"></p>
+    <div class="meter"><i id="meterfill" style="width:0%"></i></div>
+    <div class="meter-label"><span id="meterleft"></span><span id="meterright"></span></div>
+  </section>
+
+  <table id="board">
+    <thead>
+      <tr><th class="num">#</th><th>Practice</th><th class="num">Google Reviews</th><th class="num">Rating</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <section class="panel" id="trendpanel">
+    <h2>📈 Our trend over time</h2>
+    <canvas id="trend"></canvas>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--us)"></i> Review count</span>
+      <span><i class="dot" style="background:var(--gold)"></i> Leader's count</span>
+    </div>
+    <p class="single-note" id="singlenote" style="display:none">Tracking starts today — the trend chart fills in as daily snapshots are collected.</p>
+  </section>
+
+  <footer>
+    <p>Data pulled from Google Maps and refreshed automatically each day. Filtered to general-practice dentists (specialty-only orthodontic / endodontic / periodontic / pediatric offices excluded).</p>
+    <p>Our practice: <strong>Loomis &amp; McFarlane Dental Care</strong>. Built for internal tracking.</p>
+  </footer>
+</div>
+
+<script>
+const OUR_NAME = "Loomis & McFarlane Dental Care";
+
+fetch('data.json?_=' + Date.now())
+  .then(r => r.json())
+  .then(render)
+  .catch(e => { document.getElementById('msg').textContent = 'Could not load data.json'; console.error(e); });
+
+function render(data){
+  const snaps = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
+  const latest = snaps[snaps.length - 1];
+  const list = latest.dentists.slice().sort((a,b)=> b.reviews - a.reviews);
+
+  document.getElementById('updated').textContent =
+    'Last updated ' + formatDate(latest.date) + ' · ' + list.length + ' practices tracked';
+
+  // table
+  const rows = document.getElementById('rows');
+  rows.innerHTML = '';
+  const medals = ['🥇','🥈','🥉'];
+  list.forEach((d,i)=>{
+    const tr = document.createElement('tr');
+    const isUs = d.name === OUR_NAME;
+    if(isUs) tr.className = 'us';
+    const medal = medals[i] ? `<span class="medal">${medals[i]}</span> ` : '';
+    tr.innerHTML =
+      `<td class="num rankcell">${medal}${i+1}</td>`+
+      `<td>${escapeHtml(d.name)}${isUs?'<span class="badge">US</span>':''}</td>`+
+      `<td class="num">${d.reviews.toLocaleString()}</td>`+
+      `<td class="num"><span class="stars">★</span> ${d.rating.toFixed(1)}</td>`;
+    rows.appendChild(tr);
+  });
+
+  // our rank + celebration
+  const ourIdx = list.findIndex(d=>d.name===OUR_NAME);
+  const leader = list[0];
+  if(ourIdx === -1){ document.getElementById('hero').style.display='none'; }
+  else { celebrate(ourIdx+1, list.length, list[ourIdx], leader); }
+
+  // trend
+  drawTrend(snaps);
+}
+
+function celebrate(rank, total, us, leader){
+  const rankbig = document.getElementById('rankbig');
+  const msg = document.getElementById('msg');
+  rankbig.innerHTML = (rank===1?'🏆 #1':'#'+rank) + ` <small>of ${total} · ${us.reviews.toLocaleString()} reviews</small>`;
+
+  const gap = leader.reviews - us.reviews;
+  const pct = Math.round((us.reviews / leader.reviews) * 100);
+  document.getElementById('meterfill').style.width = Math.max(4, pct) + '%';
+  document.getElementById('meterleft').textContent = us.reviews.toLocaleString() + ' reviews';
+  document.getElementById('meterright').textContent = rank===1 ? '👑 You are the leader' : leader.reviews.toLocaleString() + ' (leader: ' + shorten(leader.name) + ')';
+
+  if(rank === 1){
+    msg.textContent = "🎉 We did it — #1 for Google reviews in San Carlos!";
+    confettiBurst(260); loopConfetti();
+  } else if(rank === 2){
+    msg.textContent = `🔥 So close! Just ${gap} review${gap===1?'':'s'} behind #1. Push to the top!`;
+    confettiBurst(160);
+  } else if(rank <= 3){
+    msg.textContent = `🎉 Top 3! ${gap} reviews from #1 — we're closing in.`;
+    confettiBurst(110);
+  } else {
+    msg.textContent = `Currently #${rank} — ${gap} reviews behind the leader. Climbing! 💪`;
+    confettiBurst(40);
+  }
+}
+
+function shorten(n){ return n.length>22 ? n.slice(0,20)+'…' : n; }
+function formatDate(s){ const d=new Date(s+'T00:00:00'); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
+function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---- trend chart (dependency-free canvas) ---- */
+function drawTrend(snaps){
+  const cv = document.getElementById('trend');
+  if(snaps.length < 2){ document.getElementById('singlenote').style.display='block'; }
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth, H = 220;
+  cv.width = W*dpr; cv.height = H*dpr;
+  const ctx = cv.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  const pad = {l:42,r:14,t:16,b:26};
+
+  const series = snaps.map(s=>{
+    const sorted = s.dentists.slice().sort((a,b)=>b.reviews-a.reviews);
+    const us = s.dentists.find(d=>d.name===OUR_NAME);
+    return { date:s.date, us: us?us.reviews:0, leader: sorted[0].reviews };
+  });
+  const xs = series.length;
+  const maxY = Math.max(...series.map(s=>s.leader)) * 1.1;
+  const X = i => pad.l + (W-pad.l-pad.r) * (xs===1?0.5:i/(xs-1));
+  const Y = v => H-pad.b - (H-pad.t-pad.b) * (v/maxY);
+
+  // grid + y labels
+  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.fillStyle='#9fb3c8'; ctx.font='11px sans-serif';
+  for(let g=0; g<=4; g++){
+    const v = Math.round(maxY*g/4), y=Y(v);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    ctx.fillText(v, 6, y+4);
+  }
+  const line=(key,color)=>{
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.beginPath();
+    series.forEach((s,i)=>{ const x=X(i),y=Y(s[key]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.stroke();
+    ctx.fillStyle=color;
+    series.forEach((s,i)=>{ ctx.beginPath(); ctx.arc(X(i),Y(s[key]),3.5,0,7); ctx.fill(); });
+  };
+  line('leader','#ffd34d');
+  line('us','#ff7a59');
+  // x labels (first & last)
+  ctx.fillStyle='#9fb3c8';
+  if(xs){ ctx.fillText(series[0].date.slice(5), X(0)-12, H-8); if(xs>1) ctx.fillText(series[xs-1].date.slice(5), X(xs-1)-12, H-8); }
+}
+
+/* ---- confetti ---- */
+const cc = document.getElementById('confetti');
+const cx = cc.getContext('2d');
+let parts = [], raf=null;
+function size(){ cc.width=innerWidth; cc.height=innerHeight; }
+size(); addEventListener('resize',size);
+function confettiBurst(n){
+  const colors=['#ff7a59','#ffd34d','#3ec9c4','#e9f1fb','#ff5fa2'];
+  for(let i=0;i<n;i++){
+    parts.push({x:innerWidth/2+(Math.random()-.5)*200, y:innerHeight*0.32,
+      vx:(Math.random()-.5)*9, vy:Math.random()*-11-3, g:0.22,
+      s:Math.random()*7+4, c:colors[i%colors.length], a:1, rot:Math.random()*6, vr:(Math.random()-.5)*.3});
+  }
+  if(!raf) tick();
+}
+let loop=false;
+function loopConfetti(){ loop=true; setInterval(()=>{ if(loop) confettiBurst(50); }, 1400); }
+function tick(){
+  cx.clearRect(0,0,cc.width,cc.height);
+  parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.a-=0.006;
+    cx.save(); cx.globalAlpha=Math.max(0,p.a); cx.translate(p.x,p.y); cx.rotate(p.rot);
+    cx.fillStyle=p.c; cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); cx.restore();
+  });
+  parts = parts.filter(p=>p.a>0 && p.y<cc.height+40);
+  if(parts.length) raf=requestAnimationFrame(tick); else { raf=null; cx.clearRect(0,0,cc.width,cc.height); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+today.json
+*.log
+.DS_Store
+.claude/
