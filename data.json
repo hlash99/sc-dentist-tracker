@@ -5,16 +5,106 @@
     {
       "date": "2026-05-30",
       "dentists": [
-        { "name": "Frank Hsu, DDS", "reviews": 259, "rating": 4.9 },
-        { "name": "Avalon Dental – Dr. Elizabeth Dinh", "reviews": 138, "rating": 4.9 },
-        { "name": "Yenba Bui Sing, DMD", "reviews": 106, "rating": 5.0 },
-        { "name": "Valerie Gilman, DDS – San Carlos", "reviews": 97, "rating": 4.9 },
-        { "name": "Klebaner Alek DDS", "reviews": 84, "rating": 5.0 },
-        { "name": "Chestnut Dental Care", "reviews": 82, "rating": 5.0 },
-        { "name": "Held and Lau DDS", "reviews": 79, "rating": 4.9 },
-        { "name": "Loomis & McFarlane Dental Care", "reviews": 68, "rating": 5.0 },
-        { "name": "Chow & Ysaac Family Dentistry", "reviews": 25, "rating": 5.0 },
-        { "name": "Laurel Dental San Carlos", "reviews": 10, "rating": 4.6 }
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 259,
+          "rating": 4.9
+        },
+        {
+          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "reviews": 138,
+          "rating": 4.9
+        },
+        {
+          "name": "Yenba Bui Sing, DMD",
+          "reviews": 106,
+          "rating": 5
+        },
+        {
+          "name": "Valerie Gilman, DDS – San Carlos",
+          "reviews": 97,
+          "rating": 4.9
+        },
+        {
+          "name": "Klebaner Alek DDS",
+          "reviews": 84,
+          "rating": 5
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 82,
+          "rating": 5
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 79,
+          "rating": 4.9
+        },
+        {
+          "name": "Loomis & McFarlane Dental Care",
+          "reviews": 68,
+          "rating": 5
+        },
+        {
+          "name": "Chow & Ysaac Family Dentistry",
+          "reviews": 25,
+          "rating": 5
+        },
+        {
+          "name": "Laurel Dental San Carlos",
+          "reviews": 10,
+          "rating": 4.6
+        }
+      ]
+    },
+    {
+      "date": "2026-05-31",
+      "dentists": [
+        {
+          "name": "Alok Arora, DMD",
+          "reviews": 513,
+          "rating": 4.8
+        },
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 259,
+          "rating": 4.9
+        },
+        {
+          "name": "Young Dental Group",
+          "reviews": 139,
+          "rating": 5
+        },
+        {
+          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "reviews": 138,
+          "rating": 4.9
+        },
+        {
+          "name": "Valerie Gilman, DDS – San Carlos",
+          "reviews": 97,
+          "rating": 4.9
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 79,
+          "rating": 4.9
+        },
+        {
+          "name": "Loomis & McFarlane Dental Care",
+          "reviews": 71,
+          "rating": 5
+        },
+        {
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 54,
+          "rating": 4.9
+        },
+        {
+          "name": "City Dental Group San Carlos",
+          "reviews": 21,
+          "rating": 4.8
+        }
       ]
     }
   ]
