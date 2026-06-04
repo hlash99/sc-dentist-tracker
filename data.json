@@ -151,84 +151,49 @@
       "date": "2026-06-04",
       "dentists": [
         {
-          "name": "NorCal TMJ & Sleep Apnea clinic",
-          "reviews": 121,
-          "rating": 5
-        },
-        {
-          "name": "Marc Schwartz, DDS",
-          "reviews": 30,
-          "rating": 5
-        },
-        {
-          "name": "Dr. Dania T. Armas, DDS",
-          "reviews": 29,
-          "rating": 4.4
-        },
-        {
-          "name": "Dr. Melinda Reynard, DDS",
-          "reviews": 15,
+          "name": "Frank Hsu, DDS",
+          "reviews": 260,
           "rating": 4.9
         },
         {
-          "name": "Nancy Ruth Kaher, D.D.S.",
-          "reviews": 13,
+          "name": "Terence G Clancy DDS",
+          "reviews": 220,
+          "rating": 4.9
+        },
+        {
+          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "reviews": 139,
+          "rating": 4.9
+        },
+        {
+          "name": "Valerie Gilman, DDS – San Carlos",
+          "reviews": 98,
+          "rating": 4.9
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 82,
           "rating": 5
         },
         {
-          "name": "Urgent Dental Service",
-          "reviews": 9,
-          "rating": 4.1
+          "name": "Held and Lau DDS",
+          "reviews": 79,
+          "rating": 4.9
         },
         {
-          "name": "Dr. Carliza A. Marcos, DDS",
-          "reviews": 8,
+          "name": "Loomis & McFarlane Dental Care",
+          "reviews": 77,
           "rating": 5
         },
         {
-          "name": "Dr. Robert J. Pelzar, DMD",
-          "reviews": 7,
-          "rating": 4.7
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 54,
+          "rating": 4.9
         },
         {
-          "name": "Randhawa Dental",
-          "reviews": 7,
-          "rating": 3.7
-        },
-        {
-          "name": "Laurel Street Smiles",
-          "reviews": 5,
-          "rating": 5
-        },
-        {
-          "name": "Durk K Hong DDS",
-          "reviews": 4,
+          "name": "City Dental Group San Carlos",
+          "reviews": 21,
           "rating": 4.8
-        },
-        {
-          "name": "Dr. Aleksandr Klebaner",
-          "reviews": 2,
-          "rating": 5
-        },
-        {
-          "name": "Peninsula Children's Dentistry",
-          "reviews": 2,
-          "rating": 5
-        },
-        {
-          "name": "Family Dentistry",
-          "reviews": 2,
-          "rating": 5
-        },
-        {
-          "name": "Dr. Jean Wu",
-          "reviews": 1,
-          "rating": 5
-        },
-        {
-          "name": "Held Zachary E DDS",
-          "reviews": 1,
-          "rating": 5
         }
       ]
     }
