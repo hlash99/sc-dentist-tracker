@@ -51,6 +51,9 @@
   tr.us .rankcell{color:var(--us)}
   .medal{font-size:1.05rem}
   .stars{color:var(--gold);font-size:.82rem}
+  #board a{color:var(--teal);text-decoration:none}
+  #board a:hover{text-decoration:underline;opacity:.85}
+  tr.us td a{color:var(--us)}
 
   .panel{margin-top:30px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
   .panel h2{font-size:1.05rem;margin:0 0 14px}
@@ -154,9 +157,10 @@ function render(data){
     const isUs = d.name === OUR_NAME;
     if(isUs) tr.className = 'us';
     const medal = medals[i] ? `<span class="medal">${medals[i]}</span> ` : '';
+    const mapsUrl = 'https://www.google.com/maps/search/' + encodeURIComponent(d.name + ' San Carlos CA');
     tr.innerHTML =
       `<td class="num rankcell">${medal}${i+1}</td>`+
-      `<td>${escapeHtml(d.name)}${isUs?'<span class="badge">US</span>':''}</td>`+
+      `<td><a href="${mapsUrl}" target="_blank" rel="noopener">${escapeHtml(d.name)}</a>${isUs?'<span class="badge">US</span>':''}</td>`+
       `<td class="num">${d.reviews.toLocaleString()}</td>`+
       `<td class="num"><span class="stars">★</span> ${d.rating.toFixed(1)}</td>`;
     rows.appendChild(tr);
