@@ -49,14 +49,14 @@
   .rankbig{font-size:3.4rem;font-weight:800;line-height:1;margin:0;letter-spacing:-.03em}
   .rankbig small{font-size:1.05rem;color:var(--muted);font-weight:600;letter-spacing:0}
   .msg{font-size:1.1rem;margin:12px 0 0;font-weight:600}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0 18px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 18px}
   .stat{
     background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;
     padding:12px 14px;
   }
   .stat .k{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
   .stat .v{font-size:1.45rem;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
-  .stat .v .unit{font-size:.8rem;color:var(--muted);font-weight:600}
+  .stat .v .unit{display:block;font-size:.72rem;color:var(--muted);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .stat .v.up{color:var(--up)} .stat .v.gap{color:var(--gold)}
 
   .meter{height:14px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;border:1px solid var(--line);position:relative}
@@ -311,11 +311,19 @@ function statCards(us, rank, list, ourHist){
     if((latestDate - new Date(p.date+'T00:00:00'))/864e5 >= 7) base = p;
   }
   const gain7 = us.reviews - base.reviews;
+  const above = rank > 1 ? list[rank-2] : null;
+  const below = rank < list.length ? list[rank] : null;
   const grid = document.getElementById('statgrid');
   grid.innerHTML =
     card('Rank', `#${rank} <span class="unit">of ${list.length}</span>`) +
     card('Our reviews', us.reviews.toLocaleString()) +
     card('Gap to #1', rank===1 ? '👑 0' : gap.toLocaleString(), rank===1?'':'gap') +
+    card('To pass next', above
+      ? `${(above.reviews - us.reviews + 1).toLocaleString()} <span class="unit" title="${escapeHtml(above.name)}">${escapeHtml(shorten(above.name))}</span>`
+      : `👑 <span class="unit">we're #1</span>`, above?'gap':'') +
+    card('Lead over next', below
+      ? `+${(us.reviews - below.reviews).toLocaleString()} <span class="unit" title="${escapeHtml(below.name)}">${escapeHtml(shorten(below.name))}</span>`
+      : `— <span class="unit">last place</span>`, below?'up':'') +
     card('Last 7 days', (gain7>=0?'+':'')+gain7, gain7>0?'up':'');
   function card(k,v,cls){ return `<div class="stat"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`; }
 }
