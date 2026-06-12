@@ -3,92 +3,153 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0d1b2a" />
+<meta name="theme-color" content="#0a141f" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>San Carlos Dentist Review Tracker</title>
 <style>
   :root{
-    --bg:#0d1b2a; --panel:#16263a; --ink:#e9f1fb; --muted:#9fb3c8;
-    --gold:#ffd34d; --teal:#3ec9c4; --us:#ff7a59; --usbg:rgba(255,122,89,.14);
-    --line:rgba(255,255,255,.08);
+    --bg:#0a141f; --panel:#121f30; --panel2:#16273c; --ink:#eaf2fc; --muted:#8fa6bd;
+    --gold:#ffd34d; --teal:#3ec9c4; --us:#ff7a59; --usbg:rgba(255,122,89,.12);
+    --up:#4ade80; --down:#f87171;
+    --line:rgba(255,255,255,.07);
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   body{
     margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:radial-gradient(1200px 600px at 70% -10%,#1b3a5b 0%,var(--bg) 55%); color:var(--ink);
-    min-height:100vh; -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1100px 520px at 75% -12%, #1c3c5e 0%, transparent 60%),
+      radial-gradient(800px 500px at -10% 30%, #14283f 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
     overflow-x:hidden; padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
   }
-  .wrap{max-width:920px;margin:0 auto;padding:28px 20px 80px}
+  .wrap{max-width:960px;margin:0 auto;padding:30px 20px 80px}
   .lbl-short{display:none}
+
   header h1{font-size:1.9rem;margin:0 0 4px;letter-spacing:-.02em}
   header p{color:var(--muted);margin:0;font-size:.95rem}
-  .updated{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .updated{
+    display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+    font-size:.78rem;color:var(--muted);background:var(--panel);
+    border:1px solid var(--line);border-radius:99px;padding:5px 12px;
+  }
+  .updated .pulse{width:7px;height:7px;border-radius:99px;background:var(--up);box-shadow:0 0 0 0 rgba(74,222,128,.5);animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.45)}70%{box-shadow:0 0 0 7px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 
+  /* ---- hero ---- */
   .hero{
-    margin:26px 0; padding:22px 24px; border-radius:18px;
-    background:linear-gradient(135deg,#16314d,#102236); border:1px solid var(--line);
+    margin:26px 0 14px; padding:24px; border-radius:20px;
+    background:linear-gradient(135deg,#17324e,#0f2034); border:1px solid var(--line);
     position:relative; overflow:hidden;
   }
-  .hero .rankbig{font-size:3.2rem;font-weight:800;line-height:1;margin:0}
-  .hero .rankbig small{font-size:1.1rem;color:var(--muted);font-weight:600}
-  .hero .msg{font-size:1.15rem;margin:10px 0 16px;font-weight:600}
-  .meter{height:14px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;border:1px solid var(--line)}
-  .meter > i{display:block;height:100%;background:linear-gradient(90deg,var(--us),var(--gold));border-radius:99px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+  .hero::after{content:'';position:absolute;inset:0;background:radial-gradient(420px 180px at 85% 0%,rgba(255,211,77,.07),transparent 70%);pointer-events:none}
+  .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .rankbig{font-size:3.4rem;font-weight:800;line-height:1;margin:0;letter-spacing:-.03em}
+  .rankbig small{font-size:1.05rem;color:var(--muted);font-weight:600;letter-spacing:0}
+  .msg{font-size:1.1rem;margin:12px 0 0;font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0 18px}
+  .stat{
+    background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;
+    padding:12px 14px;
+  }
+  .stat .k{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .stat .v{font-size:1.45rem;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+  .stat .v .unit{font-size:.8rem;color:var(--muted);font-weight:600}
+  .stat .v.up{color:var(--up)} .stat .v.gap{color:var(--gold)}
+
+  .meter{height:14px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;border:1px solid var(--line);position:relative}
+  .meter > i{
+    display:block;height:100%;border-radius:99px;width:0;
+    background:linear-gradient(90deg,var(--us),var(--gold));
+    transition:width 1.3s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;
+  }
+  .meter > i::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
+    transform:translateX(-100%);animation:shimmer 2.8s 1.4s infinite;
+  }
+  @keyframes shimmer{to{transform:translateX(100%)}}
   .meter-label{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:8px}
 
-  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.96rem}
-  th,td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
-  th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  /* ---- leaderboard ---- */
+  .board-panel{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:8px 18px 14px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th,td{padding:13px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  th{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-  td:nth-child(2){overflow-wrap:anywhere}
+  td.name-cell{overflow-wrap:anywhere}
+  tbody tr{animation:rise .5s both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   tr.us{background:var(--usbg)}
   tr.us td{font-weight:700}
-  .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--us);color:#1a0d08;margin-left:8px;vertical-align:middle}
+  .badge{display:inline-block;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--us);color:#1a0d08;margin-left:8px;vertical-align:middle}
   .rankcell{font-weight:700;color:var(--muted)}
   tr.us .rankcell{color:var(--us)}
   .medal{font-size:1.05rem}
+  .mv{font-size:.7rem;font-weight:800;margin-left:4px;vertical-align:middle}
+  .mv.up{color:var(--up)} .mv.down{color:var(--down)}
   .stars{color:var(--gold);font-size:.82rem}
-  #board a{color:var(--teal);text-decoration:none}
-  #board a:hover{text-decoration:underline;opacity:.85}
+  td a{color:var(--teal);text-decoration:none}
+  td a:hover{text-decoration:underline;opacity:.85}
   tr.us td a{color:var(--us)}
+  .delta{display:inline-block;min-width:38px;font-variant-numeric:tabular-nums;font-size:.8rem;font-weight:700;border-radius:8px;padding:2px 7px}
+  .delta.pos{color:var(--up);background:rgba(74,222,128,.1)}
+  .delta.zero{color:var(--muted)}
+  .delta.neg{color:var(--down);background:rgba(248,113,113,.1)}
+  .spark{display:block;margin-left:auto}
+  .spark-flat{color:var(--muted);font-size:.8rem}
 
-  .panel{margin-top:30px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  /* ---- trend panel ---- */
+  .panel{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 22px;position:relative}
   .panel h2{font-size:1.05rem;margin:0 0 14px}
-  canvas#trend{width:100%;height:220px;display:block}
+  canvas#trend{width:100%;height:240px;display:block;touch-action:pan-y;cursor:crosshair}
   .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-top:10px}
   .legend span{display:inline-flex;align-items:center;gap:6px}
   .dot{width:10px;height:10px;border-radius:99px;display:inline-block}
+  #tip{
+    position:absolute;display:none;pointer-events:none;z-index:5;
+    background:#0d1928;border:1px solid rgba(255,255,255,.14);border-radius:10px;
+    padding:8px 11px;font-size:.78rem;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.45);
+    white-space:nowrap;
+  }
+  #tip b{font-variant-numeric:tabular-nums}
+  .single-note{color:var(--muted);font-size:.85rem;margin-top:8px}
 
   footer{margin-top:36px;font-size:.78rem;color:var(--muted);line-height:1.6}
   footer a{color:var(--teal)}
   canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
-  .single-note{color:var(--muted);font-size:.85rem;margin-top:8px}
 
   /* ---- phones ---- */
+  @media (max-width:640px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .spark-col{display:none}
+  }
   @media (max-width:560px){
     .wrap{padding:18px 14px 56px}
     header h1{font-size:1.35rem;line-height:1.2}
     header p{font-size:.85rem}
-    .updated{font-size:.74rem}
-    .hero{padding:18px 16px;border-radius:14px;margin:20px 0}
-    .hero .rankbig{font-size:2.4rem}
-    .hero .rankbig small{display:block;margin-top:6px;font-size:.9rem}
-    .hero .msg{font-size:1rem;margin:12px 0 14px}
+    .hero{padding:18px 16px;border-radius:16px;margin:20px 0 10px}
+    .rankbig{font-size:2.5rem}
+    .rankbig small{display:block;margin-top:6px;font-size:.9rem}
+    .msg{font-size:.98rem}
+    .stat .v{font-size:1.2rem}
     .meter-label{flex-direction:column;gap:3px;font-size:.74rem}
-    th,td{padding:11px 9px;font-size:.9rem}
-    th{font-size:.6rem;letter-spacing:.03em}
+    .board-panel{padding:2px 8px 6px;border-radius:14px}
+    th,td{padding:11px 8px;font-size:.88rem}
+    th{font-size:.58rem;letter-spacing:.03em}
     .lbl-full{display:none}
     .lbl-short{display:inline}
     .medal{font-size:.95rem}
-    .badge{margin-left:6px}
-    .panel{padding:16px 14px;margin-top:24px}
-    canvas#trend{height:200px}
+    .badge{margin-left:5px}
+    .delta{min-width:32px;padding:2px 5px;font-size:.74rem}
+    .panel{padding:16px 14px;margin-top:22px}
+    canvas#trend{height:210px}
   }
   @media (max-width:380px){
-    th,td{padding:10px 6px;font-size:.84rem}
+    th,td{padding:10px 5px;font-size:.82rem}
     header h1{font-size:1.2rem}
   }
 </style>
@@ -99,28 +160,43 @@
   <header>
     <h1>🦷 San Carlos GP Dentist Review Tracker</h1>
     <p>Google review counts for general-practice dentists in San Carlos, CA — most to least.</p>
-    <div class="updated" id="updated"></div>
+    <div class="updated" id="updated" style="display:none"><span class="pulse"></span><span id="updatedtext"></span></div>
   </header>
 
   <section class="hero" id="hero">
-    <p class="rankbig" id="rankbig">—</p>
-    <p class="msg" id="msg"></p>
+    <div class="hero-top">
+      <div>
+        <p class="rankbig" id="rankbig">—</p>
+        <p class="msg" id="msg"></p>
+      </div>
+    </div>
+    <div class="stats" id="statgrid"></div>
     <div class="meter"><i id="meterfill" style="width:0%"></i></div>
     <div class="meter-label"><span id="meterleft"></span><span id="meterright"></span></div>
   </section>
 
-  <table id="board">
-    <thead>
-      <tr><th class="num">#</th><th>Practice</th><th class="num"><span class="lbl-full">Google Reviews</span><span class="lbl-short">Reviews</span></th><th class="num">Rating</th></tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
+  <section class="board-panel">
+    <table id="board">
+      <thead>
+        <tr>
+          <th class="num">#</th>
+          <th>Practice</th>
+          <th class="num spark-col">Trend</th>
+          <th class="num"><span class="lbl-full">Δ since last</span><span class="lbl-short">Δ</span></th>
+          <th class="num"><span class="lbl-full">Reviews</span><span class="lbl-short">Rev</span></th>
+          <th class="num">Rating</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
 
   <section class="panel" id="trendpanel">
     <h2>📈 Our trend over time</h2>
     <canvas id="trend"></canvas>
+    <div id="tip"></div>
     <div class="legend">
-      <span><i class="dot" style="background:var(--us)"></i> Review count</span>
+      <span><i class="dot" style="background:var(--us)"></i> Our review count</span>
       <span><i class="dot" style="background:var(--gold)"></i> Leader's count</span>
     </div>
     <p class="single-note" id="singlenote" style="display:none">Tracking starts today — the trend chart fills in as daily snapshots are collected.</p>
@@ -134,6 +210,11 @@
 
 <script>
 const OUR_NAME = "Loomis & McFarlane Dental Care";
+// Snapshots sometimes spell the same practice with en dashes vs hyphens; match on a normalized key.
+const norm = s => s.toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
+const OUR_KEY = norm(OUR_NAME);
+
+let SNAPS = [];
 
 fetch('data.json?_=' + Date.now())
   .then(r => r.json())
@@ -141,39 +222,102 @@ fetch('data.json?_=' + Date.now())
   .catch(e => { document.getElementById('msg').textContent = 'Could not load data.json'; console.error(e); });
 
 function render(data){
-  const snaps = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
-  const latest = snaps[snaps.length - 1];
+  SNAPS = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
+  const latest = SNAPS[SNAPS.length - 1];
+  const prev = SNAPS.length > 1 ? SNAPS[SNAPS.length - 2] : null;
   const list = latest.dentists.slice().sort((a,b)=> b.reviews - a.reviews);
 
-  document.getElementById('updated').textContent =
+  const upd = document.getElementById('updated');
+  upd.style.display = 'inline-flex';
+  document.getElementById('updatedtext').textContent =
     'Last updated ' + formatDate(latest.date) + ' · ' + list.length + ' practices tracked';
+
+  // per-practice history across all snapshots (for sparklines + deltas)
+  const history = new Map();
+  SNAPS.forEach(s => s.dentists.forEach(d => {
+    const k = norm(d.name);
+    if(!history.has(k)) history.set(k, []);
+    history.get(k).push({ date: s.date, reviews: d.reviews });
+  }));
+  const prevRank = new Map();
+  if(prev){
+    prev.dentists.slice().sort((a,b)=>b.reviews-a.reviews)
+      .forEach((d,i)=> prevRank.set(norm(d.name), i+1));
+  }
+  const prevReviews = new Map();
+  if(prev) prev.dentists.forEach(d => prevReviews.set(norm(d.name), d.reviews));
 
   // table
   const rows = document.getElementById('rows');
   rows.innerHTML = '';
   const medals = ['🥇','🥈','🥉'];
   list.forEach((d,i)=>{
+    const k = norm(d.name);
     const tr = document.createElement('tr');
-    const isUs = d.name === OUR_NAME;
+    const isUs = k === OUR_KEY;
     if(isUs) tr.className = 'us';
+    tr.style.animationDelay = (i*45)+'ms';
+
     const medal = medals[i] ? `<span class="medal">${medals[i]}</span> ` : '';
+    const pr = prevRank.get(k);
+    let move = '';
+    if(pr && pr !== i+1){
+      move = pr > i+1 ? `<span class="mv up" title="Up from #${pr}">▲${pr-(i+1)}</span>`
+                      : `<span class="mv down" title="Down from #${pr}">▼${(i+1)-pr}</span>`;
+    }
     const mapsUrl = 'https://www.google.com/maps/search/' + encodeURIComponent(d.name + ' San Carlos CA');
+
+    let delta = `<span class="delta zero" title="No previous snapshot">·</span>`;
+    if(prev){
+      if(prevReviews.has(k)){
+        const dv = d.reviews - prevReviews.get(k);
+        delta = dv > 0 ? `<span class="delta pos">+${dv}</span>`
+              : dv < 0 ? `<span class="delta neg">${dv}</span>`
+              : `<span class="delta zero">—</span>`;
+      } else {
+        delta = `<span class="delta pos" title="Newly tracked">new</span>`;
+      }
+    }
+
     tr.innerHTML =
-      `<td class="num rankcell">${medal}${i+1}</td>`+
-      `<td><a href="${mapsUrl}" target="_blank" rel="noopener">${escapeHtml(d.name)}</a>${isUs?'<span class="badge">US</span>':''}</td>`+
+      `<td class="num rankcell">${medal}${i+1}${move}</td>`+
+      `<td class="name-cell"><a href="${mapsUrl}" target="_blank" rel="noopener">${escapeHtml(d.name)}</a>${isUs?'<span class="badge">US</span>':''}</td>`+
+      `<td class="num spark-col">${sparkline(history.get(k)||[], isUs?'#ff7a59':'#5e7fa0')}</td>`+
+      `<td class="num">${delta}</td>`+
       `<td class="num">${d.reviews.toLocaleString()}</td>`+
       `<td class="num"><span class="stars">★</span> ${d.rating.toFixed(1)}</td>`;
     rows.appendChild(tr);
   });
 
-  // our rank + celebration
-  const ourIdx = list.findIndex(d=>d.name===OUR_NAME);
+  // our rank + celebration + stat cards
+  const ourIdx = list.findIndex(d=>norm(d.name)===OUR_KEY);
   const leader = list[0];
   if(ourIdx === -1){ document.getElementById('hero').style.display='none'; }
-  else { celebrate(ourIdx+1, list.length, list[ourIdx], leader); }
+  else {
+    statCards(list[ourIdx], ourIdx+1, list, history.get(OUR_KEY)||[]);
+    celebrate(ourIdx+1, list.length, list[ourIdx], leader);
+  }
 
-  // trend
-  drawTrend(snaps);
+  drawTrend();
+}
+
+function statCards(us, rank, list, ourHist){
+  const leader = list[0];
+  const gap = leader.reviews - us.reviews;
+  // gain over trailing ~7 days (closest snapshot at least 7 days back, else earliest)
+  const latestDate = new Date(ourHist[ourHist.length-1].date+'T00:00:00');
+  let base = ourHist[0];
+  for(const p of ourHist){
+    if((latestDate - new Date(p.date+'T00:00:00'))/864e5 >= 7) base = p;
+  }
+  const gain7 = us.reviews - base.reviews;
+  const grid = document.getElementById('statgrid');
+  grid.innerHTML =
+    card('Rank', `#${rank} <span class="unit">of ${list.length}</span>`) +
+    card('Our reviews', us.reviews.toLocaleString()) +
+    card('Gap to #1', rank===1 ? '👑 0' : gap.toLocaleString(), rank===1?'':'gap') +
+    card('Last 7 days', (gain7>=0?'+':'')+gain7, gain7>0?'up':'');
+  function card(k,v,cls){ return `<div class="stat"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`; }
 }
 
 function celebrate(rank, total, us, leader){
@@ -183,7 +327,7 @@ function celebrate(rank, total, us, leader){
 
   const gap = leader.reviews - us.reviews;
   const pct = Math.round((us.reviews / leader.reviews) * 100);
-  document.getElementById('meterfill').style.width = Math.max(4, pct) + '%';
+  requestAnimationFrame(()=>{ document.getElementById('meterfill').style.width = Math.max(4, pct) + '%'; });
   document.getElementById('meterleft').textContent = us.reviews.toLocaleString() + ' reviews';
   document.getElementById('meterright').textContent = rank===1 ? '👑 You are the leader' : leader.reviews.toLocaleString() + ' (leader: ' + shorten(leader.name) + ')';
 
@@ -206,47 +350,109 @@ function shorten(n){ return n.length>22 ? n.slice(0,20)+'…' : n; }
 function formatDate(s){ const d=new Date(s+'T00:00:00'); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-/* ---- trend chart (dependency-free canvas) ---- */
-function drawTrend(snaps){
+/* ---- per-row sparkline (inline SVG) ---- */
+function sparkline(points, color){
+  if(points.length < 2) return '<span class="spark-flat">—</span>';
+  const w=84,h=26,p=3;
+  const vals = points.map(x=>x.reviews);
+  const min=Math.min(...vals), max=Math.max(...vals), span=(max-min)||1;
+  const X=i=>p+(w-2*p)*i/(vals.length-1);
+  const Y=v=>h-p-(h-2*p)*(v-min)/span;
+  const d=vals.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">`+
+    `<path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`+
+    `<circle cx="${X(vals.length-1).toFixed(1)}" cy="${Y(vals[vals.length-1]).toFixed(1)}" r="2.6" fill="${color}"/></svg>`;
+}
+
+/* ---- trend chart (dependency-free canvas, with hover tooltip) ---- */
+let trendSeries = [], trendGeom = null;
+function drawTrend(){
   const cv = document.getElementById('trend');
-  if(snaps.length < 2){ document.getElementById('singlenote').style.display='block'; }
+  if(SNAPS.length < 2){ document.getElementById('singlenote').style.display='block'; }
   const dpr = window.devicePixelRatio || 1;
-  const W = cv.clientWidth, H = 220;
+  const W = cv.clientWidth, H = cv.clientHeight || 240;
   cv.width = W*dpr; cv.height = H*dpr;
   const ctx = cv.getContext('2d'); ctx.scale(dpr,dpr);
   ctx.clearRect(0,0,W,H);
-  const pad = {l:42,r:14,t:16,b:26};
+  const pad = {l:44,r:14,t:14,b:28};
 
-  const series = snaps.map(s=>{
+  trendSeries = SNAPS.map(s=>{
     const sorted = s.dentists.slice().sort((a,b)=>b.reviews-a.reviews);
-    const us = s.dentists.find(d=>d.name===OUR_NAME);
+    const us = s.dentists.find(d=>norm(d.name)===OUR_KEY);
     return { date:s.date, us: us?us.reviews:0, leader: sorted[0].reviews };
   });
-  const xs = series.length;
-  const maxY = Math.max(...series.map(s=>s.leader)) * 1.1;
+  const xs = trendSeries.length;
+  const maxY = Math.max(...trendSeries.map(s=>s.leader)) * 1.12;
   const X = i => pad.l + (W-pad.l-pad.r) * (xs===1?0.5:i/(xs-1));
   const Y = v => H-pad.b - (H-pad.t-pad.b) * (v/maxY);
+  trendGeom = {X,Y,pad,W,H};
 
   // grid + y labels
-  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.fillStyle='#9fb3c8'; ctx.font='11px sans-serif';
+  ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.fillStyle='#8fa6bd'; ctx.font='11px -apple-system,sans-serif';
   for(let g=0; g<=4; g++){
     const v = Math.round(maxY*g/4), y=Y(v);
     ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
-    ctx.fillText(v, 6, y+4);
+    ctx.fillText(v.toLocaleString(), 6, y+4);
   }
+  // x labels: up to 6, evenly spaced
+  const nLab = Math.min(xs, 6);
+  ctx.fillStyle='#8fa6bd'; ctx.textAlign='center';
+  for(let j=0;j<nLab;j++){
+    const i = nLab===1 ? 0 : Math.round(j*(xs-1)/(nLab-1));
+    ctx.fillText(trendSeries[i].date.slice(5).replace('-','/'), X(i), H-8);
+  }
+  ctx.textAlign='left';
+
+  const area=(key,color)=>{
+    if(xs<2) return;
+    const grad = ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+    grad.addColorStop(0, color+'33'); grad.addColorStop(1, color+'00');
+    ctx.fillStyle=grad; ctx.beginPath();
+    trendSeries.forEach((s,i)=>{ const x=X(i),y=Y(s[key]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.lineTo(X(xs-1),H-pad.b); ctx.lineTo(X(0),H-pad.b); ctx.closePath(); ctx.fill();
+  };
   const line=(key,color)=>{
-    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.beginPath();
-    series.forEach((s,i)=>{ const x=X(i),y=Y(s[key]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.beginPath();
+    trendSeries.forEach((s,i)=>{ const x=X(i),y=Y(s[key]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
     ctx.stroke();
     ctx.fillStyle=color;
-    series.forEach((s,i)=>{ ctx.beginPath(); ctx.arc(X(i),Y(s[key]),3.5,0,7); ctx.fill(); });
+    trendSeries.forEach((s,i)=>{ ctx.beginPath(); ctx.arc(X(i),Y(s[key]),3.5,0,7); ctx.fill(); });
   };
+  area('leader','#ffd34d'); area('us','#ff7a59');
   line('leader','#ffd34d');
   line('us','#ff7a59');
-  // x labels (first & last)
-  ctx.fillStyle='#9fb3c8';
-  if(xs){ ctx.fillText(series[0].date.slice(5), X(0)-12, H-8); if(xs>1) ctx.fillText(series[xs-1].date.slice(5), X(xs-1)-12, H-8); }
 }
+
+/* hover tooltip */
+(function(){
+  const cv = document.getElementById('trend');
+  const tip = document.getElementById('tip');
+  const panel = document.getElementById('trendpanel');
+  function show(clientX){
+    if(!trendGeom || !trendSeries.length) return;
+    const r = cv.getBoundingClientRect();
+    const mx = clientX - r.left;
+    const xs = trendSeries.length;
+    let best=0, bd=Infinity;
+    for(let i=0;i<xs;i++){ const d=Math.abs(trendGeom.X(i)-mx); if(d<bd){bd=d;best=i;} }
+    if(bd > 40){ tip.style.display='none'; return; }
+    const s = trendSeries[best];
+    tip.innerHTML = `<div>${formatDate(s.date)}</div>`+
+      `<div style="color:#ff7a59">Us: <b>${s.us.toLocaleString()}</b></div>`+
+      `<div style="color:#ffd34d">Leader: <b>${s.leader.toLocaleString()}</b></div>`;
+    tip.style.display='block';
+    const pr = panel.getBoundingClientRect();
+    let left = r.left - pr.left + trendGeom.X(best) + 12;
+    if(left + tip.offsetWidth > pr.width - 8) left = r.left - pr.left + trendGeom.X(best) - tip.offsetWidth - 12;
+    tip.style.left = left + 'px';
+    tip.style.top = (r.top - pr.top + trendGeom.Y(s.us) - 20) + 'px';
+  }
+  cv.addEventListener('mousemove', e=>show(e.clientX));
+  cv.addEventListener('mouseleave', ()=>{ tip.style.display='none'; });
+  cv.addEventListener('touchstart', e=>show(e.touches[0].clientX), {passive:true});
+  cv.addEventListener('touchmove', e=>show(e.touches[0].clientX), {passive:true});
+  let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(SNAPS.length) drawTrend(); },150); });
+})();
 
 /* ---- confetti ---- */
 const cc = document.getElementById('confetti');
