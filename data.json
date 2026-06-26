@@ -1,6 +1,6 @@
 {
   "ourPractice": "Loomis & McFarlane Dental Care",
-  "source": "Google Maps — search: \"dentist San Carlos CA\" (category: Dentist / general practice only)",
+  "source": "Google Maps \u2014 search: \"dentist San Carlos CA\" (category: Dentist / general practice only)",
   "snapshots": [
     {
       "date": "2026-05-30",
@@ -11,7 +11,7 @@
           "rating": 4.9
         },
         {
-          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "name": "Avalon Dental \u2013 Dr. Elizabeth Dinh",
           "reviews": 138,
           "rating": 4.9
         },
@@ -21,7 +21,7 @@
           "rating": 5
         },
         {
-          "name": "Valerie Gilman, DDS – San Carlos",
+          "name": "Valerie Gilman, DDS \u2013 San Carlos",
           "reviews": 97,
           "rating": 4.9
         },
@@ -66,12 +66,12 @@
           "rating": 4.9
         },
         {
-          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "name": "Avalon Dental \u2013 Dr. Elizabeth Dinh",
           "reviews": 138,
           "rating": 4.9
         },
         {
-          "name": "Valerie Gilman, DDS – San Carlos",
+          "name": "Valerie Gilman, DDS \u2013 San Carlos",
           "reviews": 97,
           "rating": 4.9
         },
@@ -111,12 +111,12 @@
           "rating": 4.9
         },
         {
-          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "name": "Avalon Dental \u2013 Dr. Elizabeth Dinh",
           "reviews": 139,
           "rating": 4.9
         },
         {
-          "name": "Valerie Gilman, DDS – San Carlos",
+          "name": "Valerie Gilman, DDS \u2013 San Carlos",
           "reviews": 97,
           "rating": 4.9
         },
@@ -161,12 +161,12 @@
           "rating": 4.9
         },
         {
-          "name": "Avalon Dental – Dr. Elizabeth Dinh",
+          "name": "Avalon Dental \u2013 Dr. Elizabeth Dinh",
           "reviews": 139,
           "rating": 4.9
         },
         {
-          "name": "Valerie Gilman, DDS – San Carlos",
+          "name": "Valerie Gilman, DDS \u2013 San Carlos",
           "reviews": 98,
           "rating": 4.9
         },
@@ -438,6 +438,61 @@
         {
           "name": "Loomis & McFarlane Dental Care",
           "reviews": 87,
+          "rating": 5
+        },
+        {
+          "name": "Klebaner Alek DDS",
+          "reviews": 86,
+          "rating": 5
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 82,
+          "rating": 5
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 81,
+          "rating": 4.9
+        },
+        {
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 53,
+          "rating": 4.9
+        },
+        {
+          "name": "City Dental Group San Carlos",
+          "reviews": 21,
+          "rating": 4.8
+        }
+      ]
+    },
+    {
+      "date": "2026-06-25",
+      "dentists": [
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 262,
+          "rating": 4.9
+        },
+        {
+          "name": "Terence G Clancy DDS",
+          "reviews": 220,
+          "rating": 4.9
+        },
+        {
+          "name": "Avalon Dental - Dr. Elizabeth Dinh",
+          "reviews": 140,
+          "rating": 4.9
+        },
+        {
+          "name": "Valerie Gilman, DDS - San Carlos",
+          "reviews": 99,
+          "rating": 4.9
+        },
+        {
+          "name": "Loomis & McFarlane Dental Care",
+          "reviews": 88,
           "rating": 5
         },
         {
