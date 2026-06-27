@@ -1,0 +1,40 @@
+name: update
+
+# Weekly server-side refresh of the dentists' Google review counts (no computer needed).
+# Needs a free Google Places API key in the GOOGLE_PLACES_API_KEY repo secret; without
+# it, fetch.mjs exits cleanly and nothing changes (keep using record.mjs manually).
+on:
+  schedule:
+    - cron: '37 15 * * 1'    # Mondays 15:37 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Refresh review counts
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        run: node fetch.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- data.json; then
+            git add data.json
+            git commit -m "update: dentist review counts $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "no change (or no API key configured)"
+          fi
