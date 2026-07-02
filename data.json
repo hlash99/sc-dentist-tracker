@@ -637,7 +637,7 @@
       "dentists": [
         {
           "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
-          "reviews": 395,
+          "reviews": 396,
           "rating": 5
         },
         {
@@ -672,7 +672,7 @@
         },
         {
           "name": "Loomis & McFarlane Dental Care",
-          "reviews": 93,
+          "reviews": 94,
           "rating": 5
         },
         {
@@ -687,7 +687,7 @@
         },
         {
           "name": "Chestnut Dental Care",
-          "reviews": 82,
+          "reviews": 83,
           "rating": 5
         },
         {
@@ -706,6 +706,11 @@
           "rating": 4.8
         },
         {
+          "name": "Dr. Melinda Reynard, DDS",
+          "reviews": 15,
+          "rating": 4.9
+        },
+        {
           "name": "Laurel Dental San Carlos",
           "reviews": 10,
           "rating": 4.6
@@ -714,6 +719,11 @@
           "name": "Dr. Robert J. Pelzar, DMD",
           "reviews": 7,
           "rating": 4.7
+        },
+        {
+          "name": "Durk K Hong DDS",
+          "reviews": 4,
+          "rating": 4.8
         }
       ]
     }
