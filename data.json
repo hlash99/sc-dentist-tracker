@@ -631,6 +631,91 @@
           "rating": 4.6
         }
       ]
+    },
+    {
+      "date": "2026-07-02",
+      "dentists": [
+        {
+          "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
+          "reviews": 395,
+          "rating": 5
+        },
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 265,
+          "rating": 4.9
+        },
+        {
+          "name": "Terence G Clancy DDS",
+          "reviews": 220,
+          "rating": 4.9
+        },
+        {
+          "name": "Avalon Dental - Dr. Elizabeth Dinh",
+          "reviews": 140,
+          "rating": 4.9
+        },
+        {
+          "name": "Yenba Bui Sing, DMD",
+          "reviews": 106,
+          "rating": 5
+        },
+        {
+          "name": "Valerie Gilman, DDS - San Carlos",
+          "reviews": 99,
+          "rating": 4.9
+        },
+        {
+          "name": "Marcos & Marcos DDS",
+          "reviews": 97,
+          "rating": 5
+        },
+        {
+          "name": "Loomis & McFarlane Dental Care",
+          "reviews": 93,
+          "rating": 5
+        },
+        {
+          "name": "Klebaner Alek DDS",
+          "reviews": 86,
+          "rating": 5
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 83,
+          "rating": 4.9
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 82,
+          "rating": 5
+        },
+        {
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 53,
+          "rating": 4.9
+        },
+        {
+          "name": "Chow & Ysaac Family Dentistry",
+          "reviews": 26,
+          "rating": 5
+        },
+        {
+          "name": "City Dental Group San Carlos",
+          "reviews": 21,
+          "rating": 4.8
+        },
+        {
+          "name": "Laurel Dental San Carlos",
+          "reviews": 10,
+          "rating": 4.6
+        },
+        {
+          "name": "Dr. Robert J. Pelzar, DMD",
+          "reviews": 7,
+          "rating": 4.7
+        }
+      ]
     }
   ]
 }
