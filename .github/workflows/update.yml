@@ -1,11 +1,12 @@
 name: update
 
-# Weekly server-side refresh of the dentists' Google review counts (no computer needed).
+# Daily server-side refresh of the dentists' Google review counts (no computer needed).
+# fetch.mjs both re-queries tracked practices and auto-discovers new GP dentists in town.
 # Needs a free Google Places API key in the GOOGLE_PLACES_API_KEY repo secret; without
 # it, fetch.mjs exits cleanly and nothing changes (keep using record.mjs manually).
 on:
   schedule:
-    - cron: '37 15 * * 1'    # Mondays 15:37 UTC
+    - cron: '37 15 * * *'    # daily 15:37 UTC (~08:37 PT)
   workflow_dispatch: {}
 
 permissions:
