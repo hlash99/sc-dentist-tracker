@@ -3,37 +3,45 @@
  * Server-side refresh of the tracked San Carlos dentists' Google review counts,
  * recorded as today's snapshot in data.json. Runs on GitHub Actions (update.yml).
  *
- * Uses the Google Places API (Text Search New). Requires a free API key in the
- * GOOGLE_PLACES_API_KEY env var / repo secret. If the key is missing it exits 0
- * without changing anything, so the workflow degrades gracefully (keep recording
- * manually via record.mjs until a key is added).
+ * Two interchangeable backends, picked by whichever repo secret is present:
+ *   - GOOGLE_PLACES_API_KEY : Google Places API, Text Search New (preferred if set;
+ *                             needs a Google Cloud project with billing attached)
+ *   - SERPAPI_KEY           : SerpApi google_maps engine (free plan, no card;
+ *                             ~1 search/day here, well inside the free quota)
+ * If neither is set the script exits 0 without changes, so the workflow degrades
+ * gracefully (keep recording manually via record.mjs until a key is added).
  *
- * Re-queries each currently-tracked practice by name (keeps the existing roster);
- * a practice that can't be resolved keeps its last-known numbers for the day.
+ * Auto-discovers general-practice dentists in the area and re-queries any tracked
+ * practice discovery misses; one that can't be resolved keeps its last-known numbers.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
 const DATA = new URL("./data.json", import.meta.url);
-const KEY = process.env.GOOGLE_PLACES_API_KEY;
+const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
+const SERP_KEY = process.env.SERPAPI_KEY;
 const AREA = process.env.DENTIST_AREA || "San Carlos CA";
+const AREA_LL = process.env.DENTIST_LL || "@37.5072,-122.2605,13z";   // centers SerpApi maps queries on San Carlos
 
-if (!KEY) {
-  console.log("GOOGLE_PLACES_API_KEY not set — skipping server-side refresh (no change). "
-    + "Add the secret to enable it, or keep using record.mjs manually.");
+if (!PLACES_KEY && !SERP_KEY) {
+  console.log("Neither GOOGLE_PLACES_API_KEY nor SERPAPI_KEY is set — skipping server-side "
+    + "refresh (no change). Add one of the secrets to enable it, or keep using record.mjs manually.");
   process.exit(0);
 }
+const BACKEND = PLACES_KEY ? "places" : "serpapi";
 
 const todayISO = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-async function lookup(name) {
+/* ── Google Places backend ─────────────────────────────────────────── */
+
+async function placesLookup(name) {
   const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Goog-Api-Key": KEY,
+      "X-Goog-Api-Key": PLACES_KEY,
       "X-Goog-FieldMask": "places.displayName,places.userRatingCount,places.rating",
     },
     body: JSON.stringify({ textQuery: `${name} dentist ${AREA}`, maxResultCount: 1 }),
@@ -45,34 +53,80 @@ async function lookup(name) {
   return { reviews: p.userRatingCount, rating: typeof p.rating === "number" ? p.rating : null };
 }
 
+/* ── SerpApi backend (free plan) ───────────────────────────────────── */
+
+async function serpSearch(q) {
+  const url = "https://serpapi.com/search.json?engine=google_maps&type=search"
+    + `&q=${encodeURIComponent(q)}&ll=${encodeURIComponent(AREA_LL)}&api_key=${SERP_KEY}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`SerpApi ${r.status} for "${q}"`);
+  const j = await r.json();
+  if (j.error) throw new Error(`SerpApi: ${j.error}`);
+  // Specific queries return a single place_results object; broad ones local_results[].
+  return j.place_results ? [j.place_results] : (j.local_results || []);
+}
+
+const serpPlace = p => {
+  const name = (p.title || "").trim();
+  if (!name || typeof p.reviews !== "number") return null;
+  return {
+    name,
+    reviews: p.reviews,
+    rating: typeof p.rating === "number" ? p.rating : null,
+    address: p.address || "",
+    closed: /permanently closed/i.test(p.open_state || p.description || ""),
+  };
+};
+
+async function serpLookup(name) {
+  const hits = (await serpSearch(`${name} dentist ${AREA}`)).map(serpPlace).filter(Boolean);
+  return hits[0] ? { reviews: hits[0].reviews, rating: hits[0].rating } : null;
+}
+
+const lookup = BACKEND === "places" ? placesLookup : serpLookup;
+
 // Practices we don't track: specialty-only offices (the site tracks general-practice dentists).
 const SPECIALTY = /orthodont|endodont|periodont|pediatric|pedodont|prosthodont|\bkids?\b|children|\bbraces\b|oral (and maxillofacial )?surg|maxillofacial/i;
 const norm = s => s.toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ").trim();
 
 // Discover general-practice dentists in the area so the roster maintains itself — new offices
 // that open (or that we hadn't tracked) get picked up automatically instead of by hand.
-async function discover() {
+// Both backends produce candidates in one shape; the GP/in-town/open filters are shared.
+const gpFilter = c => c && !c.closed && !SPECIALTY.test(c.name)
+  && (!c.address || /san carlos/i.test(c.address));
+
+async function placesDiscover() {
   const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Goog-Api-Key": KEY,
+      "X-Goog-Api-Key": PLACES_KEY,
       "X-Goog-FieldMask": "places.displayName,places.userRatingCount,places.rating,places.formattedAddress,places.businessStatus,places.types",
     },
     body: JSON.stringify({ textQuery: `dentist in ${AREA}`, maxResultCount: 20 }),
   });
   if (!r.ok) throw new Error(`Places discovery ${r.status}`);
   const j = await r.json();
-  const found = [];
-  for (const p of j.places || []) {
+  return (j.places || []).map(p => {
     const name = p.displayName?.text?.trim();
-    if (!name || typeof p.userRatingCount !== "number") continue;
-    if (p.businessStatus && p.businessStatus !== "OPERATIONAL") continue;   // skip closed
-    if (SPECIALTY.test(name)) continue;                                     // GP only
-    if (p.formattedAddress && !/san carlos/i.test(p.formattedAddress)) continue; // in-town only
-    found.push({ name, reviews: p.userRatingCount, rating: typeof p.rating === "number" ? p.rating : null });
-  }
-  return found;
+    if (!name || typeof p.userRatingCount !== "number") return null;
+    return {
+      name,
+      reviews: p.userRatingCount,
+      rating: typeof p.rating === "number" ? p.rating : null,
+      address: p.formattedAddress || "",
+      closed: !!(p.businessStatus && p.businessStatus !== "OPERATIONAL"),
+    };
+  });
+}
+
+async function serpDiscover() {
+  return (await serpSearch(`dentist in ${AREA}`)).map(serpPlace);
+}
+
+async function discover() {
+  const raw = BACKEND === "places" ? await placesDiscover() : await serpDiscover();
+  return raw.filter(gpFilter).map(({ name, reviews, rating }) => ({ name, reviews, rating }));
 }
 
 async function main() {
@@ -124,7 +178,7 @@ async function main() {
   const us = out.find(d => d.name === data.ourPractice);
   const rank = us ? out.findIndex(d => d.name === data.ourPractice) + 1 : "?";
   const newNote = discovered ? ` (+${discovered} newly discovered)` : "";
-  console.log(`Recorded ${date}: ${out.length} practices${newNote}. ${data.ourPractice} = #${rank} (${us ? us.reviews : "?"} reviews).`);
+  console.log(`Recorded ${date} via ${BACKEND}: ${out.length} practices${newNote}. ${data.ourPractice} = #${rank} (${us ? us.reviews : "?"} reviews).`);
 }
 const prevRating = (prev, name) => (prev.dentists.find(d => d.name === name) || {}).rating ?? null;
 const keepLast = (prev, name) => { const d = prev.dentists.find(x => x.name === name); return d ? { ...d } : { name, reviews: 0, rating: null }; };
