@@ -203,7 +203,7 @@
   </section>
 
   <footer>
-    <p>Data pulled from Google Maps and refreshed automatically each day. Filtered to general-practice dentists (specialty-only orthodontic / endodontic / periodontic / pediatric offices excluded).</p>
+    <p>Data pulled from Google Maps and refreshed automatically twice a day; an open tab picks up fresh data on its own — no reload needed. Filtered to general-practice dentists (specialty-only orthodontic / endodontic / periodontic / pediatric offices excluded).</p>
     <p>Our practice: <strong>Loomis &amp; McFarlane Dental Care</strong>. Built for internal tracking.</p>
   </footer>
 </div>
@@ -216,10 +216,33 @@ const OUR_KEY = norm(OUR_NAME);
 
 let SNAPS = [];
 
-fetch('data.json?_=' + Date.now())
-  .then(r => r.json())
-  .then(render)
-  .catch(e => { document.getElementById('msg').textContent = 'Could not load data.json'; console.error(e); });
+/* ── Live updates (same pattern as the World Cup tracker) ─────────────
+   The server refreshes data twice a day; the page polls for it every 10
+   minutes and re-renders ONLY when the payload actually changed, so an
+   open tab (e.g. the office display) always shows the latest snapshot
+   without a manual reload. Switching back to the tab re-checks at once. */
+let lastPayload = null, lastFetch = 0;
+
+async function loadData(){
+  lastFetch = Date.now();
+  try{
+    const r = await fetch('data.json?_=' + Date.now(), { cache: 'no-store' });
+    const text = await r.text();
+    if(text === lastPayload) return;          // nothing new — leave the page alone
+    const data = JSON.parse(text);            // parse before committing, so a bad payload can't blank the page
+    lastPayload = text;
+    render(data);
+  }catch(e){
+    if(!lastPayload){ document.getElementById('msg').textContent = 'Could not load data.json'; console.error(e); }
+    // background refresh failures stay silent — keep showing last-good data
+  }
+}
+
+loadData();
+setInterval(loadData, 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && Date.now() - lastFetch > 2 * 60 * 1000) loadData();
+});
 
 function render(data){
   SNAPS = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
@@ -478,7 +501,8 @@ function confettiBurst(n){
   if(!raf) tick();
 }
 let loop=false;
-function loopConfetti(){ loop=true; setInterval(()=>{ if(loop) confettiBurst(50); }, 1400); }
+let loopTimer=null;
+function loopConfetti(){ loop=true; if(!loopTimer) loopTimer=setInterval(()=>{ if(loop) confettiBurst(50); }, 1400); }
 function tick(){
   cx.clearRect(0,0,cc.width,cc.height);
   parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.a-=0.006;
