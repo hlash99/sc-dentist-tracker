@@ -28,6 +28,9 @@
   .wrap{max-width:960px;margin:0 auto;padding:30px 20px 80px}
   .lbl-short{display:none}
 
+  .crumb{font-size:.82rem;margin-bottom:8px}
+  .crumb a{color:var(--muted);text-decoration:none;transition:color .12s}
+  .crumb a:hover{color:var(--teal)}
   header h1{font-size:1.9rem;margin:0 0 4px;letter-spacing:-.02em}
   header p{color:var(--muted);margin:0;font-size:.95rem}
   .updated{
@@ -158,6 +161,7 @@
 <canvas id="confetti"></canvas>
 <div class="wrap">
   <header>
+    <div class="crumb"><a href="https://hlash99.github.io/">← hlash99 dashboard</a></div>
     <h1>🦷 San Carlos GP Dentist Review Tracker</h1>
     <p>Google review counts for general-practice dentists in San Carlos, CA — most to least.</p>
     <div class="updated" id="updated" style="display:none"><span class="pulse"></span><span id="updatedtext"></span></div>
