@@ -8,7 +8,8 @@ name: update
 # With neither secret, fetch.mjs exits cleanly and nothing changes (record.mjs manually).
 on:
   schedule:
-    - cron: '37 15 * * *'    # daily 15:37 UTC (~08:37 PT)
+    - cron: '37 14 * * *'    # ~07:37 PT — morning snapshot
+    - cron: '37 2 * * *'     # ~19:37 PT — evening snapshot catches same-day reviews
   workflow_dispatch: {}
 
 permissions:

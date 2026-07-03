@@ -12,12 +12,13 @@ and throws a bigger celebration the closer we get to #1.
   dentists in town and updates every tracked practice's review count.
 
 ## Server-side daily refresh (no computer needed)
-`.github/workflows/update.yml` runs `fetch.mjs` daily at 15:37 UTC. It needs **one**
-of these repo secrets (Actions → Secrets); with neither, the run is a clean no-op:
+`.github/workflows/update.yml` runs `fetch.mjs` twice daily (~7:37am and ~7:37pm PT),
+so reviews posted during the day land the same evening. It needs **one** of these
+repo secrets (Actions → Secrets); with neither, the run is a clean no-op:
 
 | Secret | Backend | Cost |
 |---|---|---|
-| `SERPAPI_KEY` | [SerpApi](https://serpapi.com) `google_maps` engine | Free plan (no credit card) — this uses ~1–2 searches/day, well under the monthly quota |
+| `SERPAPI_KEY` | [SerpApi](https://serpapi.com) `google_maps` engine | Free plan (no credit card) — ~2–3 searches/day (each run logs `searches used`); practices missed by discovery are only re-queried every 3 days to keep usage flat |
 | `GOOGLE_PLACES_API_KEY` | Google Places API (Text Search New) | Free tier, but requires a Google Cloud project with billing attached |
 
 `fetch.mjs` prefers Google Places when both are set. Either backend feeds the same

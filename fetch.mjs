@@ -55,9 +55,12 @@ async function placesLookup(name) {
 
 /* ── SerpApi backend (free plan) ───────────────────────────────────── */
 
+let searchesUsed = 0;   // logged at the end so free-tier quota burn is visible in Actions logs
+
 async function serpSearch(q) {
   const url = "https://serpapi.com/search.json?engine=google_maps&type=search"
     + `&q=${encodeURIComponent(q)}&ll=${encodeURIComponent(AREA_LL)}&api_key=${SERP_KEY}`;
+  searchesUsed++;
   const r = await fetch(url);
   if (!r.ok) throw new Error(`SerpApi ${r.status} for "${q}"`);
   const j = await r.json();
@@ -142,23 +145,33 @@ async function main() {
 
   // 1) auto-discover current GP dentists in town (non-fatal if it fails)
   try {
+    const date = todayISO();
     for (const d of await discover()) {
       const k = norm(d.name);
       if (!canonical.has(k)) discovered++;
       const name = canonical.get(k) || d.name;
-      byKey.set(k, { name, reviews: d.reviews, rating: d.rating ?? prevRating(prev, name) });
+      byKey.set(k, { name, reviews: d.reviews, rating: d.rating ?? prevRating(prev, name), checked: date });
       okCount++;
     }
   } catch (e) {
     console.warn(`  ! discovery skipped: ${e.message}`);
   }
 
-  // 2) refresh any tracked practice that discovery didn't return (dropped out of the top results)
+  // 2) refresh any tracked practice that discovery didn't return (dropped out of the top
+  //    results). To keep per-run API usage ~flat now that we run twice a day, a missed
+  //    practice is only re-queried when its data is FALLBACK_AFTER_DAYS old — small
+  //    offices outside the discovery top-20 still refresh every few days.
+  const today = todayISO();
   for (const name of roster) {
     if (byKey.has(norm(name))) continue;
+    const last = prev.dentists.find(d => d.name === name);
+    if (last && last.checked && daysBetween(last.checked, today) < FALLBACK_AFTER_DAYS) {
+      byKey.set(norm(name), keepLast(prev, name));
+      continue;
+    }
     try {
       const hit = await lookup(name);
-      if (hit) { byKey.set(norm(name), { name, reviews: hit.reviews, rating: hit.rating ?? prevRating(prev, name) }); okCount++; }
+      if (hit) { byKey.set(norm(name), { name, reviews: hit.reviews, rating: hit.rating ?? prevRating(prev, name), checked: today }); okCount++; }
       else byKey.set(norm(name), keepLast(prev, name));
     } catch (e) {
       console.warn(`  ! ${name}: ${e.message} — keeping last-known`);
@@ -179,7 +192,10 @@ async function main() {
   const rank = us ? out.findIndex(d => d.name === data.ourPractice) + 1 : "?";
   const newNote = discovered ? ` (+${discovered} newly discovered)` : "";
   console.log(`Recorded ${date} via ${BACKEND}: ${out.length} practices${newNote}. ${data.ourPractice} = #${rank} (${us ? us.reviews : "?"} reviews).`);
+  if (BACKEND === "serpapi") console.log(`searches used this run: ${searchesUsed}`);
 }
+const FALLBACK_AFTER_DAYS = 3;
+const daysBetween = (a, b) => Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5);
 const prevRating = (prev, name) => (prev.dentists.find(d => d.name === name) || {}).rating ?? null;
 const keepLast = (prev, name) => { const d = prev.dentists.find(x => x.name === name); return d ? { ...d } : { name, reviews: 0, rating: null }; };
 
