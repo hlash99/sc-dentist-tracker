@@ -76,6 +76,23 @@
   @keyframes shimmer{to{transform:translateX(100%)}}
   .meter-label{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:8px}
 
+  /* ---- champion mode (rank #1) ---- */
+  .hero.champ{
+    background:linear-gradient(135deg,#42320d,#251d05 55%,#1b1504);
+    border-color:rgba(255,211,77,.5);
+    box-shadow:0 0 0 1px rgba(255,211,77,.22), 0 12px 55px rgba(255,211,77,.14);
+  }
+  .hero.champ::after{background:radial-gradient(560px 260px at 85% 0%,rgba(255,211,77,.24),transparent 70%)}
+  .hero.champ .rankbig{color:var(--gold);text-shadow:0 0 32px rgba(255,211,77,.5)}
+  .hero.champ .msg{color:var(--gold)}
+  .hero.champ .stat{border-color:rgba(255,211,77,.22)}
+  .champ-crown{
+    position:absolute;top:10px;right:18px;font-size:3rem;line-height:1;pointer-events:none;
+    animation:crownfloat 2.6s ease-in-out infinite;
+    filter:drop-shadow(0 6px 18px rgba(255,211,77,.55));
+  }
+  @keyframes crownfloat{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-9px) rotate(8deg)}}
+
   /* ---- leaderboard ---- */
   .board-panel{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:8px 18px 14px;overflow:hidden}
   table{width:100%;border-collapse:collapse;font-size:.95rem}
@@ -121,6 +138,25 @@
   #tip b{font-variant-numeric:tabular-nums}
   .single-note{color:var(--muted);font-size:.85rem;margin-top:8px}
 
+  /* ---- projection panel ---- */
+  .predict-head{font-size:.95rem;line-height:1.65;margin:0}
+  .predict-head b{color:var(--gold)}
+  .rungs{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .rung{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;
+    padding:10px 14px;font-size:.88rem;
+  }
+  .rung .rk{font-weight:800;color:var(--muted);min-width:30px}
+  .rung .nm{font-weight:600;flex:1;min-width:150px;overflow-wrap:anywhere}
+  .rung .need{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rung .eta{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rung .eta.soon{color:var(--up)}
+  .rung .eta.far{color:var(--muted)}
+  .rung.crown-rung{border-color:rgba(255,211,77,.35);background:rgba(255,211,77,.06)}
+  .rung.crown-rung .rk,.rung.crown-rung .eta{color:var(--gold)}
+  .predict-note{color:var(--muted);font-size:.75rem;margin:12px 0 0}
+
   footer{margin-top:36px;font-size:.78rem;color:var(--muted);line-height:1.6}
   footer a{color:var(--teal)}
   canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
@@ -150,6 +186,8 @@
     .delta{min-width:32px;padding:2px 5px;font-size:.74rem}
     .panel{padding:16px 14px;margin-top:22px}
     canvas#trend{height:210px}
+    .rung{padding:9px 10px;font-size:.8rem;gap:8px}
+    .champ-crown{font-size:2.2rem;top:8px;right:12px}
   }
   @media (max-width:380px){
     th,td{padding:10px 5px;font-size:.82rem}
@@ -177,6 +215,13 @@
     <div class="stats" id="statgrid"></div>
     <div class="meter"><i id="meterfill" style="width:0%"></i></div>
     <div class="meter-label"><span id="meterleft"></span><span id="meterright"></span></div>
+  </section>
+
+  <section class="panel" id="predictpanel" style="display:none">
+    <h2>🔮 Path to #1 — projected pass dates</h2>
+    <p class="predict-head" id="predicthead"></p>
+    <ul class="rungs" id="rungs"></ul>
+    <p class="predict-note" id="predictnote"></p>
   </section>
 
   <section class="board-panel">
@@ -218,7 +263,11 @@ const OUR_NAME = "Loomis & McFarlane Dental Care";
 const norm = s => s.toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
 const OUR_KEY = norm(OUR_NAME);
 
+// Add ?demo1 to the URL to preview champion mode (pretends we just took #1).
+const DEMO_CHAMP = new URLSearchParams(location.search).has('demo1');
+
 let SNAPS = [];
+let LATEST_MS = 0;
 
 /* ── Live updates (same pattern as the World Cup tracker) ─────────────
    The server refreshes data twice a day; the page polls for it every 10
@@ -251,6 +300,12 @@ document.addEventListener('visibilitychange', () => {
 function render(data){
   SNAPS = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
   const latest = SNAPS[SNAPS.length - 1];
+  if(DEMO_CHAMP){
+    const top = Math.max(...latest.dentists.map(d=>d.reviews));
+    const usDemo = latest.dentists.find(d=>norm(d.name)===OUR_KEY);
+    if(usDemo) usDemo.reviews = top + 2;
+  }
+  LATEST_MS = new Date(latest.date + 'T00:00:00').getTime();
   const prev = SNAPS.length > 1 ? SNAPS[SNAPS.length - 2] : null;
   const list = latest.dentists.slice().sort((a,b)=> b.reviews - a.reviews);
 
@@ -319,9 +374,13 @@ function render(data){
   // our rank + celebration + stat cards
   const ourIdx = list.findIndex(d=>norm(d.name)===OUR_KEY);
   const leader = list[0];
-  if(ourIdx === -1){ document.getElementById('hero').style.display='none'; }
+  if(ourIdx === -1){
+    document.getElementById('hero').style.display='none';
+    document.getElementById('predictpanel').style.display='none';
+  }
   else {
     statCards(list[ourIdx], ourIdx+1, list, history.get(OUR_KEY)||[]);
+    renderPrediction(list, ourIdx, history);
     celebrate(ourIdx+1, list.length, list[ourIdx], leader);
   }
 
@@ -355,6 +414,106 @@ function statCards(us, rank, list, ourHist){
   function card(k,v,cls){ return `<div class="stat"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`; }
 }
 
+/* ---- projections ----
+   Pace = least-squares slope (reviews/day) over the trailing window of
+   snapshots; falls back to the full history when the window is too thin.
+   A pass date only exists while our pace exceeds the other practice's. */
+const RATE_WINDOW_DAYS = 14;
+function paceOf(hist){
+  if(!hist || hist.length < 2) return null;
+  const latest = new Date(hist[hist.length-1].date+'T00:00:00');
+  let pts = hist.filter(p => (latest - new Date(p.date+'T00:00:00'))/864e5 <= RATE_WINDOW_DAYS);
+  if(pts.length < 2) pts = hist;
+  const xs = pts.map(p => (new Date(p.date+'T00:00:00') - latest)/864e5);
+  const ys = pts.map(p => p.reviews);
+  const n = xs.length;
+  const mx = xs.reduce((a,b)=>a+b,0)/n, my = ys.reduce((a,b)=>a+b,0)/n;
+  let num=0, den=0;
+  for(let i=0;i<n;i++){ num += (xs[i]-mx)*(ys[i]-my); den += (xs[i]-mx)*(xs[i]-mx); }
+  return den ? num/den : null;
+}
+function etaDateOpts(d){
+  const o = {month:'short',day:'numeric'};
+  if(d.getFullYear() !== new Date(LATEST_MS).getFullYear()) o.year = 'numeric';
+  return o;
+}
+function etaPhrase(days){
+  const n = Math.ceil(days);
+  if(n <= 0) return 'any moment now';
+  if(days > 365) return 'over a year out at this pace';
+  const d = new Date(LATEST_MS + days*864e5);
+  return '≈ ' + d.toLocaleDateString(undefined, {weekday:'short', ...etaDateOpts(d)}) + ` (~${n} day${n===1?'':'s'})`;
+}
+function etaShort(days){
+  if(Math.ceil(days) <= 0) return 'any moment';
+  if(days > 365) return '1+ year';
+  const d = new Date(LATEST_MS + days*864e5);
+  return '≈ ' + d.toLocaleDateString(undefined, etaDateOpts(d)) + ` · ${Math.ceil(days)}d`;
+}
+const paceStr = r => (r>=0?'+':'') + r.toFixed(1) + '/day';
+
+function renderPrediction(list, ourIdx, history){
+  const panel = document.getElementById('predictpanel');
+  const head = document.getElementById('predicthead');
+  const rungs = document.getElementById('rungs');
+  const note = document.getElementById('predictnote');
+  panel.style.display = '';
+  rungs.innerHTML = '';
+  note.textContent = `Projected from each practice's pace over the last ${RATE_WINDOW_DAYS} days of snapshots — dates shift as new data lands.`;
+
+  const us = list[ourIdx];
+  const ourRate = paceOf(history.get(OUR_KEY));
+  if(ourRate === null){
+    head.textContent = 'Not enough history yet to project pass dates — check back after a few more snapshots.';
+    note.textContent = '';
+    return;
+  }
+
+  if(ourIdx === 0){
+    const two = list[1];
+    if(!two){ head.textContent = '👑 We are #1 — and the only practice tracked.'; return; }
+    const theirRate = paceOf(history.get(norm(two.name))) ?? 0;
+    const lead = us.reviews - two.reviews;
+    let threat = "They aren't gaining on us at the current pace — the crown is safe. 🛡️";
+    if(theirRate - ourRate > 0.01){
+      threat = `At current pace they'd catch us ${etaPhrase((lead+1)/(theirRate-ourRate))} — keep the reviews coming!`;
+    }
+    head.innerHTML = `👑 <b>We're #1!</b> Closest challenger is ${escapeHtml(two.name)}, ` +
+      `${lead} review${lead===1?'':'s'} behind, growing <b>${paceStr(theirRate)}</b> vs our <b>${paceStr(ourRate)}</b>. ${threat}`;
+    return;
+  }
+
+  const nxt = list[ourIdx-1];
+  const nrate = paceOf(history.get(norm(nxt.name))) ?? 0;
+  const need = nxt.reviews - us.reviews + 1;
+  const closing = ourRate - nrate;
+  if(closing <= 0.01){
+    head.innerHTML = `Next up: <b>${escapeHtml(nxt.name)}</b> — ${need} more review${need===1?'':'s'} to pass. ` +
+      `They're growing <b>${paceStr(nrate)}</b> vs our <b>${paceStr(ourRate)}</b>, so no pass in sight at the current pace — time to rally reviews! 📣`;
+  } else {
+    head.innerHTML = `Next up: <b>${escapeHtml(nxt.name)}</b> — ${need} more review${need===1?'':'s'} to pass. ` +
+      `Gaining <b>${paceStr(ourRate)}</b> vs their <b>${paceStr(nrate)}</b> → projected pass <b>${etaPhrase(need/closing)}</b>.`;
+  }
+
+  for(let i=ourIdx-1; i>=0; i--){
+    const p = list[i];
+    const r = paceOf(history.get(norm(p.name))) ?? 0;
+    const needP = p.reviews - us.reviews + 1;
+    const close = ourRate - r;
+    const li = document.createElement('li');
+    li.className = 'rung' + (i===0?' crown-rung':'');
+    let eta = 'not at current pace', cls = 'far';
+    if(close > 0.01){
+      const d = needP/close;
+      eta = (i===0?'👑 ':'') + etaShort(d);
+      if(d <= 30) cls = 'soon';
+    }
+    li.innerHTML = `<span class="rk">#${i+1}</span><span class="nm">${escapeHtml(p.name)}</span>` +
+      `<span class="need">${needP} to pass · ${paceStr(r)}</span><span class="eta ${cls}">${eta}</span>`;
+    rungs.appendChild(li);
+  }
+}
+
 function celebrate(rank, total, us, leader){
   const rankbig = document.getElementById('rankbig');
   const msg = document.getElementById('msg');
@@ -366,10 +525,26 @@ function celebrate(rank, total, us, leader){
   document.getElementById('meterleft').textContent = us.reviews.toLocaleString() + ' reviews';
   document.getElementById('meterright').textContent = rank===1 ? '👑 You are the leader' : leader.reviews.toLocaleString() + ' (leader: ' + shorten(leader.name) + ')';
 
+  const hero = document.getElementById('hero');
   if(rank === 1){
-    msg.textContent = "🎉 We did it — #1 for Google reviews in San Carlos!";
-    confettiBurst(260); loopConfetti();
-  } else if(rank === 2){
+    hero.classList.add('champ');
+    if(!document.getElementById('champcrown')){
+      const c = document.createElement('div');
+      c.id = 'champcrown'; c.className = 'champ-crown'; c.textContent = '👑';
+      hero.appendChild(c);
+    }
+    document.title = '🏆 #1! San Carlos Dentist Review Tracker';
+    msg.textContent = "🏆 WE DID IT — #1 for Google reviews in San Carlos! 👑";
+    confettiBurst(300); loopConfetti();
+    return;
+  }
+  // a live-updating tab can fall back out of #1 — undo champion mode
+  hero.classList.remove('champ');
+  const crown = document.getElementById('champcrown'); if(crown) crown.remove();
+  document.title = 'San Carlos Dentist Review Tracker';
+  stopConfettiLoop();
+
+  if(rank === 2){
     msg.textContent = `🔥 So close! Just ${gap} review${gap===1?'':'s'} behind #1. Push to the top!`;
     confettiBurst(160);
   } else if(rank <= 3){
@@ -495,10 +670,11 @@ const cx = cc.getContext('2d');
 let parts = [], raf=null;
 function size(){ cc.width=innerWidth; cc.height=innerHeight; }
 size(); addEventListener('resize',size);
-function confettiBurst(n){
-  const colors=['#ff7a59','#ffd34d','#3ec9c4','#e9f1fb','#ff5fa2'];
+function confettiBurst(n, o={}){
+  const colors = o.colors || ['#ff7a59','#ffd34d','#3ec9c4','#e9f1fb','#ff5fa2'];
+  const ox = o.x ?? innerWidth/2, oy = o.y ?? innerHeight*0.32;
   for(let i=0;i<n;i++){
-    parts.push({x:innerWidth/2+(Math.random()-.5)*200, y:innerHeight*0.32,
+    parts.push({x:ox+(Math.random()-.5)*200, y:oy,
       vx:(Math.random()-.5)*9, vy:Math.random()*-11-3, g:0.22,
       s:Math.random()*7+4, c:colors[i%colors.length], a:1, rot:Math.random()*6, vr:(Math.random()-.5)*.3});
   }
@@ -506,7 +682,14 @@ function confettiBurst(n){
 }
 let loop=false;
 let loopTimer=null;
-function loopConfetti(){ loop=true; if(!loopTimer) loopTimer=setInterval(()=>{ if(loop) confettiBurst(50); }, 1400); }
+const GOLD_CONFETTI=['#ffd34d','#ffe9a3','#ff7a59','#fff6d9','#f5b91e'];
+function loopConfetti(){
+  loop=true;
+  if(!loopTimer) loopTimer=setInterval(()=>{
+    if(loop) confettiBurst(45, {x: innerWidth*(0.12+Math.random()*0.76), y: innerHeight*(0.12+Math.random()*0.35), colors: GOLD_CONFETTI});
+  }, 1200);
+}
+function stopConfettiLoop(){ loop=false; if(loopTimer){ clearInterval(loopTimer); loopTimer=null; } }
 function tick(){
   cx.clearRect(0,0,cc.width,cc.height);
   parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.a-=0.006;
