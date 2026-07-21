@@ -3036,6 +3036,137 @@
           "checked": "2026-07-18"
         }
       ]
+    },
+    {
+      "date": "2026-07-21",
+      "dentists": [
+        {
+          "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
+          "reviews": 403,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 267,
+          "rating": 4.9,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Terence G Clancy DDS",
+          "reviews": 221,
+          "rating": 4.9,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Avalon Dental - Dr. Elizabeth Dinh",
+          "reviews": 141,
+          "rating": 4.9,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Loomis & McFarlane Dental Care",
+          "reviews": 134,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Yenba Bui Sing, DMD",
+          "reviews": 106,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Valerie Gilman, DDS - San Carlos",
+          "reviews": 101,
+          "rating": 4.9,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Marcos & Marcos DDS",
+          "reviews": 101,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Klebaner Alek DDS",
+          "reviews": 88,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 87,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 82,
+          "rating": 4.9,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 53,
+          "rating": 4.9,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Chow & Ysaac Family Dentistry",
+          "reviews": 26,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "John A. Boghossian, DDS",
+          "reviews": 22,
+          "rating": 4.8,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "City Dental Group San Carlos",
+          "reviews": 21,
+          "rating": 4.8,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Dr. Melinda Reynard, DDS",
+          "reviews": 15,
+          "rating": 4.9,
+          "checked": "2026-07-20"
+        },
+        {
+          "name": "Laurel Dental San Carlos",
+          "reviews": 10,
+          "rating": 4.6,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Urgent Dental Service",
+          "reviews": 9,
+          "rating": 4.1,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Dr. Carliza A. Marcos, DDS",
+          "reviews": 8,
+          "rating": 5,
+          "checked": "2026-07-21"
+        },
+        {
+          "name": "Dr. Robert J. Pelzar, DMD",
+          "reviews": 7,
+          "rating": 4.7,
+          "checked": "2026-07-20"
+        },
+        {
+          "name": "Durk K Hong DDS",
+          "reviews": 4,
+          "rating": 4.8,
+          "checked": "2026-07-21"
+        }
+      ]
     }
   ]
 }
