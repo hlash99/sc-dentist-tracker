@@ -7344,7 +7344,7 @@
           "name": "Dr. Melinda Reynard, DDS",
           "reviews": 15,
           "rating": 4.9,
-          "checked": "2026-08-21"
+          "checked": "2026-08-22"
         },
         {
           "name": "Laurel Dental San Carlos",
@@ -7369,6 +7369,12 @@
           "reviews": 7,
           "rating": 4.7,
           "checked": "2026-08-20"
+        },
+        {
+          "name": "Laurel Street Smiles",
+          "reviews": 5,
+          "rating": 5,
+          "checked": "2026-08-22"
         },
         {
           "name": "Durk K Hong DDS",
