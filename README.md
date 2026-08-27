@@ -1,7 +1,7 @@
 # San Carlos GP Dentist Review Tracker
 
 A tiny static site that ranks general-practice dentists in San Carlos, CA by their
-Google review count (most → least), highlights **Loomis & McFarlane Dental Care**,
+Google review count (most → least), highlights **Edgewood Dental**,
 and throws a bigger celebration the closer we get to #1.
 
 ## Files
@@ -54,6 +54,15 @@ cat today.json | node record.mjs   # appends/overwrites today's snapshot
 ```
 Re-running on the same day overwrites that day's entry, so it's safe to run repeatedly.
 Once the repo is on GitHub, the task can also `git commit && git push` to update the live site.
+
+## When a practice renames its Google listing
+A rename would otherwise split one practice into two rows: discovery returns the new
+name as a brand-new entry while the old name stays in the roster and keeps resolving to
+the same office. Both `fetch.mjs` and `index.html` keep an `ALIASES` map of retired
+names → current name; add the old **normalized** name (lowercased, whitespace collapsed)
+to both maps and the history stays one continuous line. We renamed from
+*Loomis & McFarlane Dental Care* to **Edgewood Dental** in August 2026 — those entries
+are the worked example.
 
 ## Data notes
 - Source: Google Maps search "dentist San Carlos CA", filtered to the **Dentist**

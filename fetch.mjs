@@ -92,6 +92,18 @@ const lookup = BACKEND === "places" ? placesLookup : serpLookup;
 const SPECIALTY = /orthodont|endodont|periodont|pediatric|pedodont|prosthodont|\bkids?\b|children|\bbraces\b|oral (and maxillofacial )?surg|maxillofacial/i;
 const norm = s => s.toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ").trim();
 
+// A practice that renames its Google listing would otherwise fork into two entries: discovery
+// returns the new name as a brand-new key while the old name lingers in the roster and keeps
+// getting re-queried (resolving to the same place), so the table shows the same office twice.
+// Map every retired spelling onto the current name and they stay one continuous history.
+// When a tracked practice renames, add its old normalized name here.
+const ALIASES = new Map([
+  ["loomis & mcfarlane dental care", "Edgewood Dental"],
+  ["edgewood dental - dr. shifteh iranmanesh", "Edgewood Dental"],
+]);
+const canon = name => ALIASES.get(norm(name)) || name;
+const key = name => norm(canon(name));
+
 // Discover general-practice dentists in the area so the roster maintains itself — new offices
 // that open (or that we hadn't tracked) get picked up automatically instead of by hand.
 // Both backends produce candidates in one shape; the GP/in-town/open filters are shared.
@@ -135,11 +147,11 @@ async function discover() {
 async function main() {
   const data = JSON.parse(readFileSync(DATA, "utf8"));
   const prev = (data.snapshots && data.snapshots[data.snapshots.length - 1]) || { dentists: [] };
-  const roster = prev.dentists.map(d => d.name);
+  const roster = [...new Set(prev.dentists.map(d => canon(d.name)))];
   if (!roster.length) { console.error("No tracked practices in data.json."); process.exit(1); }
 
   // Canonical name per normalized key, so discovery's spelling doesn't fork a practice's history.
-  const canonical = new Map(roster.map(n => [norm(n), n]));
+  const canonical = new Map(roster.map(n => [key(n), n]));
   const byKey = new Map();   // normKey -> { name, reviews, rating }
   let okCount = 0, discovered = 0;
 
@@ -147,10 +159,12 @@ async function main() {
   try {
     const date = todayISO();
     for (const d of await discover()) {
-      const k = norm(d.name);
+      const k = key(d.name);
       if (!canonical.has(k)) discovered++;
-      const name = canonical.get(k) || d.name;
-      byKey.set(k, { name, reviews: d.reviews, rating: d.rating ?? prevRating(prev, name), checked: date });
+      const name = canonical.get(k) || canon(d.name);
+      const seen = byKey.get(k);
+      if (!seen || d.reviews >= seen.reviews)
+        byKey.set(k, { name, reviews: d.reviews, rating: d.rating ?? prevRating(prev, name), checked: date });
       okCount++;
     }
   } catch (e) {
@@ -163,19 +177,19 @@ async function main() {
   //    offices outside the discovery top-20 still refresh every few days.
   const today = todayISO();
   for (const name of roster) {
-    if (byKey.has(norm(name))) continue;
-    const last = prev.dentists.find(d => d.name === name);
+    if (byKey.has(key(name))) continue;
+    const last = prev.dentists.find(d => key(d.name) === key(name));
     if (last && last.checked && daysBetween(last.checked, today) < FALLBACK_AFTER_DAYS) {
-      byKey.set(norm(name), keepLast(prev, name));
+      byKey.set(key(name), keepLast(prev, name));
       continue;
     }
     try {
       const hit = await lookup(name);
-      if (hit) { byKey.set(norm(name), { name, reviews: hit.reviews, rating: hit.rating ?? prevRating(prev, name), checked: today }); okCount++; }
-      else byKey.set(norm(name), keepLast(prev, name));
+      if (hit) { byKey.set(key(name), { name, reviews: hit.reviews, rating: hit.rating ?? prevRating(prev, name), checked: today }); okCount++; }
+      else byKey.set(key(name), keepLast(prev, name));
     } catch (e) {
       console.warn(`  ! ${name}: ${e.message} — keeping last-known`);
-      byKey.set(norm(name), keepLast(prev, name));
+      byKey.set(key(name), keepLast(prev, name));
     }
     await new Promise(r => setTimeout(r, 200));   // be gentle on the API
   }
@@ -188,15 +202,15 @@ async function main() {
   data.snapshots.sort((a, b) => (a.date < b.date ? -1 : 1));
   writeFileSync(DATA, JSON.stringify(data, null, 2) + "\n");
 
-  const us = out.find(d => d.name === data.ourPractice);
-  const rank = us ? out.findIndex(d => d.name === data.ourPractice) + 1 : "?";
+  const us = out.find(d => key(d.name) === key(data.ourPractice));
+  const rank = us ? out.findIndex(d => key(d.name) === key(data.ourPractice)) + 1 : "?";
   const newNote = discovered ? ` (+${discovered} newly discovered)` : "";
   console.log(`Recorded ${date} via ${BACKEND}: ${out.length} practices${newNote}. ${data.ourPractice} = #${rank} (${us ? us.reviews : "?"} reviews).`);
   if (BACKEND === "serpapi") console.log(`searches used this run: ${searchesUsed}`);
 }
 const FALLBACK_AFTER_DAYS = 3;
 const daysBetween = (a, b) => Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5);
-const prevRating = (prev, name) => (prev.dentists.find(d => d.name === name) || {}).rating ?? null;
-const keepLast = (prev, name) => { const d = prev.dentists.find(x => x.name === name); return d ? { ...d } : { name, reviews: 0, rating: null }; };
+const prevRating = (prev, name) => (prev.dentists.find(d => key(d.name) === key(name)) || {}).rating ?? null;
+const keepLast = (prev, name) => { const d = prev.dentists.find(x => key(x.name) === key(name)); return d ? { ...d, name: canon(d.name) } : { name, reviews: 0, rating: null }; };
 
 main().catch(e => { console.error(e); process.exit(1); });

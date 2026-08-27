@@ -253,15 +253,38 @@
 
   <footer>
     <p>Data pulled from Google Maps and refreshed automatically twice a day; an open tab picks up fresh data on its own — no reload needed. Filtered to general-practice dentists (specialty-only orthodontic / endodontic / periodontic / pediatric offices excluded).</p>
-    <p>Our practice: <strong>Loomis &amp; McFarlane Dental Care</strong>. Built for internal tracking.</p>
+    <p>Our practice: <strong>Edgewood Dental</strong>. Built for internal tracking.</p>
   </footer>
 </div>
 
 <script>
-const OUR_NAME = "Loomis & McFarlane Dental Care";
+const OUR_NAME = "Edgewood Dental";
 // Snapshots sometimes spell the same practice with en dashes vs hyphens; match on a normalized key.
 const norm = s => s.toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
-const OUR_KEY = norm(OUR_NAME);
+// Retired names for a practice that renamed its Google listing (we were Loomis & McFarlane
+// until Aug 2026). Folding them into the current name keeps one row and one unbroken trend
+// line even if an older snapshot payload is still cached in a long-open tab.
+const ALIASES = new Map([
+  ["loomis & mcfarlane dental care", "Edgewood Dental"],
+  ["edgewood dental - dr. shifteh iranmanesh", "Edgewood Dental"],
+]);
+const canon = s => ALIASES.get(norm(s)) || s;
+const keyOf = s => norm(canon(s));
+const OUR_KEY = keyOf(OUR_NAME);
+
+// Collapse any aliased duplicates in a snapshot to one row (highest count, freshest check).
+function dedupe(dentists){
+  const by = new Map();
+  dentists.forEach(d => {
+    const k = keyOf(d.name), seen = by.get(k);
+    if(!seen) by.set(k, { ...d, name: canon(d.name) });
+    else by.set(k, { ...seen,
+      reviews: Math.max(seen.reviews, d.reviews),
+      rating: (d.checked||'') > (seen.checked||'') ? d.rating : seen.rating,
+      checked: (d.checked||'') > (seen.checked||'') ? d.checked : seen.checked });
+  });
+  return [...by.values()];
+}
 
 // Add ?demo1 to the URL to preview champion mode (pretends we just took #1).
 const DEMO_CHAMP = new URLSearchParams(location.search).has('demo1');
@@ -298,11 +321,12 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function render(data){
-  SNAPS = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
+  SNAPS = (data.snapshots || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1)
+    .map(s => ({ ...s, dentists: dedupe(s.dentists) }));
   const latest = SNAPS[SNAPS.length - 1];
   if(DEMO_CHAMP){
     const top = Math.max(...latest.dentists.map(d=>d.reviews));
-    const usDemo = latest.dentists.find(d=>norm(d.name)===OUR_KEY);
+    const usDemo = latest.dentists.find(d=>keyOf(d.name)===OUR_KEY);
     if(usDemo) usDemo.reviews = top + 2;
   }
   LATEST_MS = new Date(latest.date + 'T00:00:00').getTime();
@@ -317,24 +341,24 @@ function render(data){
   // per-practice history across all snapshots (for sparklines + deltas)
   const history = new Map();
   SNAPS.forEach(s => s.dentists.forEach(d => {
-    const k = norm(d.name);
+    const k = keyOf(d.name);
     if(!history.has(k)) history.set(k, []);
     history.get(k).push({ date: s.date, reviews: d.reviews });
   }));
   const prevRank = new Map();
   if(prev){
     prev.dentists.slice().sort((a,b)=>b.reviews-a.reviews)
-      .forEach((d,i)=> prevRank.set(norm(d.name), i+1));
+      .forEach((d,i)=> prevRank.set(keyOf(d.name), i+1));
   }
   const prevReviews = new Map();
-  if(prev) prev.dentists.forEach(d => prevReviews.set(norm(d.name), d.reviews));
+  if(prev) prev.dentists.forEach(d => prevReviews.set(keyOf(d.name), d.reviews));
 
   // table
   const rows = document.getElementById('rows');
   rows.innerHTML = '';
   const medals = ['🥇','🥈','🥉'];
   list.forEach((d,i)=>{
-    const k = norm(d.name);
+    const k = keyOf(d.name);
     const tr = document.createElement('tr');
     const isUs = k === OUR_KEY;
     if(isUs) tr.className = 'us';
@@ -372,7 +396,7 @@ function render(data){
   });
 
   // our rank + celebration + stat cards
-  const ourIdx = list.findIndex(d=>norm(d.name)===OUR_KEY);
+  const ourIdx = list.findIndex(d=>keyOf(d.name)===OUR_KEY);
   const leader = list[0];
   if(ourIdx === -1){
     document.getElementById('hero').style.display='none';
@@ -472,7 +496,7 @@ function renderPrediction(list, ourIdx, history){
   if(ourIdx === 0){
     const two = list[1];
     if(!two){ head.textContent = '👑 We are #1 — and the only practice tracked.'; return; }
-    const theirRate = paceOf(history.get(norm(two.name))) ?? 0;
+    const theirRate = paceOf(history.get(keyOf(two.name))) ?? 0;
     const lead = us.reviews - two.reviews;
     let threat = "They aren't gaining on us at the current pace — the crown is safe. 🛡️";
     if(theirRate - ourRate > 0.01){
@@ -484,7 +508,7 @@ function renderPrediction(list, ourIdx, history){
   }
 
   const nxt = list[ourIdx-1];
-  const nrate = paceOf(history.get(norm(nxt.name))) ?? 0;
+  const nrate = paceOf(history.get(keyOf(nxt.name))) ?? 0;
   const need = nxt.reviews - us.reviews + 1;
   const closing = ourRate - nrate;
   if(closing <= 0.01){
@@ -497,7 +521,7 @@ function renderPrediction(list, ourIdx, history){
 
   for(let i=ourIdx-1; i>=0; i--){
     const p = list[i];
-    const r = paceOf(history.get(norm(p.name))) ?? 0;
+    const r = paceOf(history.get(keyOf(p.name))) ?? 0;
     const needP = p.reviews - us.reviews + 1;
     const close = ourRate - r;
     const li = document.createElement('li');
@@ -588,7 +612,7 @@ function drawTrend(){
 
   trendSeries = SNAPS.map(s=>{
     const sorted = s.dentists.slice().sort((a,b)=>b.reviews-a.reviews);
-    const us = s.dentists.find(d=>norm(d.name)===OUR_KEY);
+    const us = s.dentists.find(d=>keyOf(d.name)===OUR_KEY);
     return { date:s.date, us: us?us.reviews:0, leader: sorted[0].reviews };
   });
   const xs = trendSeries.length;
