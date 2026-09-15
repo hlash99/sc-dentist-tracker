@@ -10540,7 +10540,7 @@
         },
         {
           "name": "Edgewood Dental",
-          "reviews": 173,
+          "reviews": 174,
           "rating": 5,
           "checked": "2026-09-15"
         },
@@ -10557,15 +10557,15 @@
           "checked": "2026-09-15"
         },
         {
-          "name": "Valerie Gilman, DDS - San Carlos",
-          "reviews": 102,
-          "rating": 4.9,
-          "checked": "2026-09-15"
-        },
-        {
           "name": "Marcos & Marcos DDS",
           "reviews": 102,
           "rating": 5,
+          "checked": "2026-09-15"
+        },
+        {
+          "name": "Valerie Gilman, DDS - San Carlos",
+          "reviews": 102,
+          "rating": 4.9,
           "checked": "2026-09-15"
         },
         {
@@ -10638,7 +10638,7 @@
           "name": "Dr. Robert J. Pelzar, DMD",
           "reviews": 7,
           "rating": 4.7,
-          "checked": "2026-09-14"
+          "checked": "2026-09-15"
         },
         {
           "name": "Laurel Street Smiles",
@@ -10650,7 +10650,7 @@
           "name": "Durk K Hong DDS",
           "reviews": 4,
           "rating": 4.8,
-          "checked": "2026-09-14"
+          "checked": "2026-09-15"
         }
       ]
     }
