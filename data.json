@@ -14748,7 +14748,7 @@
           "name": "Dr. Melinda Reynard, DDS",
           "reviews": 15,
           "rating": 4.9,
-          "checked": "2026-10-14"
+          "checked": "2026-10-15"
         },
         {
           "name": "Nancy Ruth Kaher, D.D.S.",
@@ -14791,6 +14791,12 @@
           "reviews": 4,
           "rating": 4.8,
           "checked": "2026-10-13"
+        },
+        {
+          "name": "Aashvi Smiles Dental Group",
+          "reviews": 2,
+          "rating": 5,
+          "checked": "2026-10-15"
         }
       ]
     }
