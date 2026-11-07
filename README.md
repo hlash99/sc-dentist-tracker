@@ -10,6 +10,12 @@ and throws a bigger celebration the closer we get to #1.
 - `record.mjs` — merges a fresh pull into `data.json` as a new dated snapshot.
 - `fetch.mjs` — server-side daily refresh (GitHub Actions): auto-discovers GP
   dentists in town and updates every tracked practice's review count.
+- `reviews.mjs` / `reviews.json` — per-review ledger for our own practice (author,
+  stars, review date, first 160 chars, first/last seen). A full sweep (~11 SerpApi
+  searches) runs weekly, or right away when our count drops, and flags any review
+  that vanished under `missing` and in `events` (type `removed`, or `restored` if it
+  comes back). Other days it does a 1-search check for new reviews. It checks
+  SerpApi's free account endpoint first and skips the sweep if quota is low.
 
 ## Server-side daily refresh (no computer needed)
 `.github/workflows/update.yml` runs `fetch.mjs` twice daily (~7:37am and ~7:37pm PT),

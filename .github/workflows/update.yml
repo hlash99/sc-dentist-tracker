@@ -32,12 +32,17 @@ jobs:
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: node fetch.mjs
+      - name: Update per-review ledger (our practice)
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+        run: node reviews.mjs
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- data.json; then
+          if [ -n "$(git status --porcelain -- data.json reviews.json)" ]; then
             git add data.json
+            [ -f reviews.json ] && git add reviews.json
             git commit -m "update: dentist review counts $(date -u +%Y-%m-%d)"
             git push
           else
