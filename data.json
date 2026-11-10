@@ -18525,5 +18525,51 @@
         }
       ]
     }
-  ]
+  ],
+  "summary": {
+    "asOf": "2026-11-09",
+    "practice": "Edgewood Dental",
+    "tracked": true,
+    "rank": 4,
+    "of": 24,
+    "reviews": 197,
+    "rating": 5,
+    "gain7": 7,
+    "gain30": 15,
+    "rankChange7": 0,
+    "next": {
+      "name": "Terence G Clancy DDS",
+      "reviews": 223,
+      "toPass": 27,
+      "gain30": 1
+    },
+    "behind": {
+      "name": "Avalon Dental - Dr. Elizabeth Dinh",
+      "reviews": 141,
+      "lead": 56,
+      "gain30": 0
+    },
+    "leader": {
+      "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
+      "reviews": 405,
+      "gap": 208
+    },
+    "drops": [
+      {
+        "date": "2026-10-28",
+        "from": 190,
+        "to": 188
+      }
+    ],
+    "ledger": {
+      "listed": 198,
+      "missing": 0,
+      "lastFullSweep": "2026-11-07",
+      "lastCheck": "2026-11-09",
+      "removed30": 0,
+      "restored30": 0,
+      "edited30": 0
+    },
+    "alerts": []
+  }
 }
