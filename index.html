@@ -157,6 +157,20 @@
   .rung.crown-rung .rk,.rung.crown-rung .eta{color:var(--gold)}
   .predict-note{color:var(--muted);font-size:.75rem;margin:12px 0 0}
 
+  /* ---- review ledger panel ---- */
+  .ledger-head{font-size:.95rem;line-height:1.6;margin:0}
+  .ledger-head b.ok{color:var(--up)} .ledger-head b.bad{color:var(--down)}
+  .ledger-facts{display:flex;flex-wrap:wrap;gap:6px 8px;margin:12px 0 0;padding:0;list-style:none}
+  .ledger-facts li{font-size:.76rem;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:99px;padding:4px 10px;white-space:nowrap}
+  .ledger-facts li b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .rung .when{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:52px}
+  .rung .tag{font-size:.68rem;font-weight:800;border-radius:99px;padding:2px 8px;white-space:nowrap}
+  .rung .tag.bad{color:var(--down);background:rgba(248,113,113,.12)}
+  .rung .tag.ok{color:var(--up);background:rgba(74,222,128,.12)}
+  .rung .tag.info{color:var(--gold);background:rgba(255,211,77,.1)}
+  .rung .why{flex-basis:100%;color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
+  .subhead{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:16px 0 0}
+
   footer{margin-top:36px;font-size:.78rem;color:var(--muted);line-height:1.6}
   footer a{color:var(--teal)}
   canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
@@ -249,6 +263,17 @@
       <span><i class="dot" style="background:var(--gold)"></i> Leader's count</span>
     </div>
     <p class="single-note" id="singlenote" style="display:none">Tracking starts today — the trend chart fills in as daily snapshots are collected.</p>
+    <p class="single-note" id="milestones" style="display:none"></p>
+  </section>
+
+  <section class="panel" id="ledgerpanel" style="display:none">
+    <h2>🧾 Review ledger — removals watch</h2>
+    <p class="ledger-head" id="ledgerhead"></p>
+    <ul class="ledger-facts" id="ledgerfacts"></ul>
+    <ul class="rungs" id="ledgermissing"></ul>
+    <p class="subhead" id="ledgerloghead" style="display:none">Log</p>
+    <ul class="rungs" id="ledgerlog"></ul>
+    <p class="predict-note" id="ledgernote"></p>
   </section>
 
   <footer>
@@ -271,6 +296,10 @@ const ALIASES = new Map([
 const canon = s => ALIASES.get(norm(s)) || s;
 const keyOf = s => norm(canon(s));
 const OUR_KEY = keyOf(OUR_NAME);
+// Most reviews first. Ties get a fixed order, so two practices on the same count don't
+// swap places (and flash ▲/▼ arrows) just because the data listed them differently.
+const byReviews = (a,b) => b.reviews - a.reviews || (keyOf(a.name) < keyOf(b.name) ? -1 : 1);
+const DAY = 864e5, dms = s => new Date(s+'T00:00:00').getTime();
 
 // Collapse any aliased duplicates in a snapshot to one row (highest count, freshest check).
 function dedupe(dentists){
@@ -331,7 +360,7 @@ function render(data){
   }
   LATEST_MS = new Date(latest.date + 'T00:00:00').getTime();
   const prev = SNAPS.length > 1 ? SNAPS[SNAPS.length - 2] : null;
-  const list = latest.dentists.slice().sort((a,b)=> b.reviews - a.reviews);
+  const list = latest.dentists.slice().sort(byReviews);
 
   const upd = document.getElementById('updated');
   upd.style.display = 'inline-flex';
@@ -347,7 +376,7 @@ function render(data){
   }));
   const prevRank = new Map();
   if(prev){
-    prev.dentists.slice().sort((a,b)=>b.reviews-a.reviews)
+    prev.dentists.slice().sort(byReviews)
       .forEach((d,i)=> prevRank.set(keyOf(d.name), i+1));
   }
   const prevReviews = new Map();
@@ -391,7 +420,7 @@ function render(data){
       `<td class="num spark-col">${sparkline(history.get(k)||[], isUs?'#ff7a59':'#5e7fa0')}</td>`+
       `<td class="num">${delta}</td>`+
       `<td class="num">${d.reviews.toLocaleString()}</td>`+
-      `<td class="num"><span class="stars">★</span> ${d.rating.toFixed(1)}</td>`;
+      `<td class="num"><span class="stars">★</span> ${Number.isFinite(d.rating) ? d.rating.toFixed(1) : '—'}</td>`;
     rows.appendChild(tr);
   });
 
@@ -409,6 +438,10 @@ function render(data){
   }
 
   drawTrend();
+  renderMilestones(list, ourIdx, history);
+  LATEST_DATE = latest.date;
+  OUR_HIST = history.get(OUR_KEY) || [];
+  renderLedger();
 }
 
 function statCards(us, rank, list, ourHist){
@@ -476,6 +509,37 @@ function etaShort(days){
 }
 const paceStr = r => (r>=0?'+':'') + r.toFixed(1) + '/day';
 
+/* How far off has this pace been? Replay it over the history we have: at each past weekly
+   checkpoint, project the gap to each practice above us 28 days ahead from the pace known
+   then, and compare with what happened. `mae` is the average miss in reviews per 28 days;
+   `cover` is how often the truth landed within ±mae. Null until there are enough replays. */
+const BT_HORIZON = 28, BT_MIN = 12;
+function closingBacktest(history, rivalKeys){
+  const us = history.get(OUR_KEY) || [];
+  if(us.length < 2) return null;
+  const first = dms(us[0].date), latest = dms(us[us.length-1].date);
+  const at = (hist, t) => { let v = null; for(const p of hist){ if(dms(p.date) <= t) v = p; else break; } return v && t - dms(v.date) <= 4*DAY ? v.reviews : null; };
+  const upTo = (hist, t) => hist.filter(p => dms(p.date) <= t);
+  const errs = [];
+  for(let t = latest - BT_HORIZON*DAY; t >= first + RATE_WINDOW_DAYS*DAY; t -= 7*DAY){
+    const u0 = at(us, t), u1 = at(us, t + BT_HORIZON*DAY), ur = paceOf(upTo(us, t));
+    if(u0 === null || u1 === null || ur === null) continue;
+    for(const k of rivalKeys){
+      const h = history.get(k) || [];
+      const r0 = at(h, t), r1 = at(h, t + BT_HORIZON*DAY), rr = paceOf(upTo(h, t));
+      if(r0 === null || r1 === null || rr === null) continue;
+      errs.push(Math.abs((ur - rr)*BT_HORIZON - ((u1 - u0) - (r1 - r0))));
+    }
+  }
+  if(errs.length < BT_MIN) return null;
+  const mae = errs.reduce((a,b)=>a+b,0)/errs.length;
+  return { mae, n: errs.length, cover: errs.filter(e => e <= mae).length/errs.length };
+}
+function etaDay(days){
+  const d = new Date(LATEST_MS + days*864e5);
+  return d.toLocaleDateString(undefined, etaDateOpts(d));
+}
+
 function renderPrediction(list, ourIdx, history){
   const panel = document.getElementById('predictpanel');
   const head = document.getElementById('predicthead');
@@ -517,6 +581,15 @@ function renderPrediction(list, ourIdx, history){
   } else {
     head.innerHTML = `Next up: <b>${escapeHtml(nxt.name)}</b> — ${need} more review${need===1?'':'s'} to pass. ` +
       `Gaining <b>${paceStr(ourRate)}</b> vs their <b>${paceStr(nrate)}</b> → projected pass <b>${etaPhrase(need/closing)}</b>.`;
+    // Honest error bar: the same pace ± its average miss when replayed over past snapshots.
+    const bt = closingBacktest(history, list.slice(0, ourIdx).map(p => keyOf(p.name)));
+    if(bt){
+      const swing = bt.mae/BT_HORIZON, early = need/(closing + swing), late = closing - swing > 0.01 ? need/(closing - swing) : null;
+      const lateTxt = late === null ? 'not at all if the pace sags' : late > 365 ? 'over a year out' : etaDay(late);
+      head.innerHTML += ` Realistic range: <b>${Math.ceil(early) <= 0 ? 'any moment' : etaDay(early)}</b> to <b>${lateTxt}</b>.`;
+      note.textContent += ` Range: replayed over ${bt.n} past 4-week stretches, this pace missed the gap change by ±${bt.mae.toFixed(1)} reviews on average` +
+        ` (${Math.round(bt.cover*100)}% landed inside that); the range applies that miss to today's pace.`;
+    }
   }
 
   for(let i=ourIdx-1; i>=0; i--){
@@ -584,6 +657,134 @@ function shorten(n){ return n.length>22 ? n.slice(0,20)+'…' : n; }
 function formatDate(s){ const d=new Date(s+'T00:00:00'); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+/* ---- who we've passed, and when (from the snapshots) ---- */
+function renderMilestones(list, ourIdx, history){
+  const el = document.getElementById('milestones');
+  el.style.display = 'none';
+  if(ourIdx < 0) return;
+  const us = new Map((history.get(OUR_KEY)||[]).map(p => [p.date, p.reviews]));
+  const passed = [];
+  list.slice(ourIdx+1).forEach(p => {
+    let lastAhead = null, passedOn = null;
+    (history.get(keyOf(p.name))||[]).forEach(h => {
+      if(!us.has(h.date)) return;
+      if(h.reviews >= us.get(h.date)){ lastAhead = h.date; passedOn = null; }
+      else if(lastAhead && !passedOn) passedOn = h.date;
+    });
+    if(passedOn) passed.push({ name: p.name, date: passedOn });
+  });
+  if(!passed.length) return;
+  passed.sort((a,b) => a.date < b.date ? -1 : 1);
+  const md = s => new Date(s+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  el.innerHTML = `Passed since tracking began (${passed.length}): ` +
+    passed.map(p => `${escapeHtml(shorten(p.name))} <span style="white-space:nowrap">(${md(p.date)})</span>`).join(' · ');
+  el.style.display = 'block';
+}
+
+/* ---- review ledger panel (reviews.json, written by reviews.mjs) ----
+   Loaded separately from data.json and entirely optional: if the file is missing or
+   unreadable the panel still shows count drops taken from the snapshots. */
+let LEDGER = null, LATEST_DATE = null, OUR_HIST = [], lastLedgerText = null;
+async function loadLedger(){
+  try{
+    const r = await fetch('reviews.json?_=' + Date.now(), { cache: 'no-store' });
+    if(!r.ok) return;
+    const text = await r.text();
+    if(text === lastLedgerText) return;
+    LEDGER = JSON.parse(text);
+    lastLedgerText = text;
+    if(LATEST_DATE) renderLedger();
+  }catch(e){ /* keep whatever we had */ }
+}
+function renderLedger(){
+  const panel = document.getElementById('ledgerpanel');
+  const md = s => s ? new Date(s+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'}) : '?';
+  const mdy = s => s ? new Date(s+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '?';
+  const stars = n => n == null ? '' : n + '★';
+  // every day our Google count went down — the only trace of a removal before the ledger existed
+  const drops = [];
+  for(let i=1;i<OUR_HIST.length;i++){
+    if(OUR_HIST[i].reviews < OUR_HIST[i-1].reviews) drops.push({ date: OUR_HIST[i].date, from: OUR_HIST[i-1].reviews, to: OUR_HIST[i].reviews });
+  }
+  const L = LEDGER && LEDGER.reviews && typeof LEDGER.reviews === 'object' ? LEDGER : null;
+  if(!L && !drops.length){ panel.style.display = 'none'; return; }
+  panel.style.display = '';
+
+  const head = document.getElementById('ledgerhead'), facts = document.getElementById('ledgerfacts');
+  const missEl = document.getElementById('ledgermissing'), logEl = document.getElementById('ledgerlog');
+  const note = document.getElementById('ledgernote');
+  missEl.innerHTML = ''; logEl.innerHTML = ''; facts.innerHTML = '';
+  const fact = (k,v) => { const li = document.createElement('li'); li.innerHTML = `${k} <b>${v}</b>`; facts.appendChild(li); };
+  const row = (el, when, tag, cls, name, why) => {
+    const li = document.createElement('li'); li.className = 'rung';
+    li.innerHTML = `<span class="when">${when}</span><span class="tag ${cls}">${tag}</span><span class="nm">${name}</span>` +
+      (why ? `<span class="why">${why}</span>` : '');
+    el.appendChild(li);
+  };
+  const log = [];
+  let began = null;
+
+  if(L){
+    const entries = Object.entries(L.reviews).map(([id,r]) => ({ id, ...r }));
+    const missing = entries.filter(r => r.missingSince).sort((a,b) => a.missingSince < b.missingSince ? 1 : -1);
+    const listed = entries.length - missing.length;
+    began = entries.map(r => r.firstSeen).filter(Boolean).sort()[0] || null;
+    const ratingNow = r => r.edits && r.edits.length ? r.edits[r.edits.length-1].rating : r.rating;
+    const google = OUR_HIST.length ? OUR_HIST[OUR_HIST.length-1].reviews : null;
+
+    head.innerHTML = missing.length
+      ? `<b class="bad">${missing.length} review${missing.length===1?'':'s'} no longer listed on Google.</b> Each was in this ledger and was absent from a later full sweep.`
+      : `<b class="ok">No reviews missing.</b> Every review recorded in this ledger was still listed at the last full sweep.`;
+    fact('Listed', listed.toLocaleString());
+    if(google !== null) fact("Google's count", google.toLocaleString());
+    fact('Full sweep', md(L.lastFullSweep));
+    fact('Last check', md(L.lastIncremental));
+    // new in the last 30 days, by the review's own date (an edited review carries its edit date)
+    const cut = new Date(dms(LATEST_DATE) - 30*DAY).toISOString().slice(0,10);
+    const isEdited = r => (r.edits && r.edits.length) || /^edited/i.test(r.relativeDate || '');
+    const recent = entries.filter(r => !r.missingSince && r.date && r.date > cut);
+    const fresh = recent.filter(r => !isEdited(r)), low = fresh.filter(r => ratingNow(r) != null && ratingNow(r) <= 3).length;
+    fact('New in 30d', fresh.length + (low ? ` · ${low} at ≤3★` : fresh.length ? ' · none ≤3★' : ''));
+    if(recent.length - fresh.length) fact('Edited in 30d', recent.length - fresh.length);
+    const mix = [5,4,3,2,1].map(n => [n, entries.filter(r => !r.missingSince && ratingNow(r) === n).length]).filter(x => x[1]);
+    fact('Stars', mix.map(x => `${x[1]}×${x[0]}★`).join(' '));
+
+    missing.forEach(r => row(missEl, md(r.missingSince), 'missing', 'bad',
+      `${escapeHtml(r.author || '(unknown)')} · ${stars(ratingNow(r))}`,
+      `Posted ${mdy(r.date)}, last seen ${md(r.lastSeen)}` + (r.snippet ? ` — “${escapeHtml(r.snippet.slice(0,90))}${r.snippet.length>90?'…':''}”` : ' — rating only, no text')));
+
+    (L.events || []).forEach(e => {
+      const who = escapeHtml(e.author || '(unknown)');
+      if(e.type === 'removed') log.push({ date: e.date, tag: 'removed', cls: 'bad', name: `${who} · ${stars(e.rating)}`,
+        why: `Posted ${mdy(e.reviewDate)}, last seen ${md(e.lastSeen)}` + (e.fetched != null ? ` · sweep returned ${e.fetched} reviews vs Google's count of ${e.googleCount ?? '?'}` : '') });
+      else if(e.type === 'restored') log.push({ date: e.date, tag: 'restored', cls: 'ok', name: `${who} · ${stars(e.rating)}`, why: `Back after going missing ${md(e.missingSince)}` });
+      else if(e.type === 'edited') log.push({ date: e.date, tag: 'edited', cls: e.prevRating != null && e.rating != null && e.rating < e.prevRating ? 'bad' : 'info',
+        name: `${who} · ` + (e.rating !== e.prevRating ? `${stars(e.prevRating)} → ${stars(e.rating)}` : stars(e.rating)),
+        why: e.rating !== e.prevRating ? 'Reviewer changed the star rating' : `Review edited (re-dated ${md(e.prevReviewDate)} → ${md(e.reviewDate)})` });
+    });
+  } else {
+    head.innerHTML = 'Per-review ledger not loaded — showing count drops from the daily snapshots only.';
+  }
+
+  drops.forEach(d => {
+    const n = d.from - d.to, pre = began && d.date < began;
+    log.push({ date: d.date, tag: 'count −' + n, cls: 'bad', name: `Google count fell ${d.from} → ${d.to}`,
+      why: pre ? `Before the per-review ledger began (${md(began)}), so which review${n===1?'':'s'} went is not known`
+               : L ? 'A full sweep runs right after a drop; any review it finds gone is logged as “removed”' : '' });
+  });
+  log.sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  document.getElementById('ledgerloghead').style.display = log.length ? '' : 'none';
+  log.slice(0, 12).forEach(e => row(logEl, md(e.date), e.tag, e.cls, e.name, e.why));
+  if(log.length > 12) row(logEl, '', '+' + (log.length-12), 'info', 'older entries in reviews.json', '');
+
+  note.textContent = L
+    ? `How it works: every listed review of ours is recorded by its Google ID${began ? ' (since ' + mdy(began) + ')' : ''}. A full sweep re-reads all of them weekly and right after any count drop; only a completed sweep can flag a review as missing, and one that returns is logged as restored. Daily checks only add new reviews. Google's count and the list can differ by one or two at any moment.`
+    : '';
+}
+loadLedger();
+setInterval(loadLedger, 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadLedger(); });
+
 /* ---- per-row sparkline (inline SVG) ---- */
 function sparkline(points, color){
   if(points.length < 2) return '<span class="spark-flat">—</span>';
@@ -611,13 +812,15 @@ function drawTrend(){
   const pad = {l:44,r:14,t:14,b:28};
 
   trendSeries = SNAPS.map(s=>{
-    const sorted = s.dentists.slice().sort((a,b)=>b.reviews-a.reviews);
+    const sorted = s.dentists.slice().sort(byReviews);
     const us = s.dentists.find(d=>keyOf(d.name)===OUR_KEY);
     return { date:s.date, us: us?us.reviews:0, leader: sorted[0].reviews };
   });
   const xs = trendSeries.length;
   const maxY = Math.max(...trendSeries.map(s=>s.leader)) * 1.12;
-  const X = i => pad.l + (W-pad.l-pad.r) * (xs===1?0.5:i/(xs-1));
+  // x is true calendar time (early snapshots were days apart), not snapshot index
+  const t0 = dms(trendSeries[0].date), tSpan = dms(trendSeries[xs-1].date) - t0;
+  const X = i => pad.l + (W-pad.l-pad.r) * (tSpan > 0 ? (dms(trendSeries[i].date)-t0)/tSpan : 0.5);
   const Y = v => H-pad.b - (H-pad.t-pad.b) * (v/maxY);
   trendGeom = {X,Y,pad,W,H};
 
@@ -628,11 +831,16 @@ function drawTrend(){
     ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
     ctx.fillText(v.toLocaleString(), 6, y+4);
   }
-  // x labels: up to 6, evenly spaced
+  // x labels: up to 6, evenly spaced in time (each on the snapshot nearest that moment)
   const nLab = Math.min(xs, 6);
   ctx.fillStyle='#8fa6bd'; ctx.textAlign='center';
+  let lastLab = -1;
   for(let j=0;j<nLab;j++){
-    const i = nLab===1 ? 0 : Math.round(j*(xs-1)/(nLab-1));
+    const target = nLab===1 ? t0 : t0 + tSpan*j/(nLab-1);
+    let i = 0, bd = Infinity;
+    trendSeries.forEach((s,q)=>{ const dd = Math.abs(dms(s.date)-target); if(dd < bd){ bd = dd; i = q; } });
+    if(i === lastLab) continue;
+    lastLab = i;
     ctx.fillText(trendSeries[i].date.slice(5).replace('-','/'), X(i), H-8);
   }
   ctx.textAlign='left';

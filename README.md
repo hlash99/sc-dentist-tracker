@@ -16,6 +16,15 @@ and throws a bigger celebration the closer we get to #1.
   that vanished under `missing` and in `events` (type `removed`, or `restored` if it
   comes back). Other days it does a 1-search check for new reviews. It checks
   SerpApi's free account endpoint first and skips the sweep if quota is low.
+  A drop triggers one sweep, not one per run that day. Each completed sweep adds a line
+  to `sweeps` (reviews fetched vs Google's count), and a known review whose stars change
+  or that Google re-dates is logged as an `edited` event (original fields are kept; the
+  change is appended to that review's `edits`). Note Google dates an edited review by
+  its last edit, so `date` is not always the original posting date.
+- `summary.mjs` — no network. Writes `data.json → summary`: our rank, count, 7/30-day
+  gain, next rival, every count drop, ledger totals, and `summary.alerts` (count drop,
+  reviews missing/restored, star rating changed, new ≤3★ review, rank change, sweep
+  overdue). Meant for the hub page or any other reader; `snapshots` is never touched.
 
 ## Server-side daily refresh (no computer needed)
 `.github/workflows/update.yml` runs `fetch.mjs` twice daily (~7:37am and ~7:37pm PT),
@@ -69,6 +78,15 @@ names → current name; add the old **normalized** name (lowercased, whitespace 
 to both maps and the history stays one continuous line. We renamed from
 *Loomis & McFarlane Dental Care* to **Edgewood Dental** in August 2026 — those entries
 are the worked example.
+
+## What the page derives
+- **Pass dates** use each practice's 14-day pace. The "realistic range" replays that same
+  pace over the stored history (weekly checkpoints, 28 days ahead, every practice above
+  us) and applies its average miss. A 28-day pace and a Poisson error bar were tried and
+  did not do better on our own gap, so the method was left alone.
+- **Review ledger panel** reads `reviews.json`: missing reviews, the removed / restored /
+  edited log, and every day our Google count fell (from the snapshots, so it also covers
+  the time before the ledger began on 2026-11-07).
 
 ## Data notes
 - Source: Google Maps search "dentist San Carlos CA", filtered to the **Dentist**

@@ -36,6 +36,8 @@ jobs:
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: node reviews.mjs
+      - name: Refresh summary + alerts block (no API calls)
+        run: node summary.mjs || echo "summary skipped"
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"

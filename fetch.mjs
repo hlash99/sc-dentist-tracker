@@ -195,7 +195,8 @@ async function main() {
   }
   if (!okCount) { console.error("All lookups failed — not writing (likely a key/quota issue)."); process.exit(1); }
 
-  const out = [...byKey.values()].sort((a, b) => b.reviews - a.reviews);
+  // Ties in a fixed order, so equal counts don't swap ranks between runs.
+  const out = [...byKey.values()].sort((a, b) => b.reviews - a.reviews || (key(a.name) < key(b.name) ? -1 : 1));
   const date = todayISO();
   data.snapshots = (data.snapshots || []).filter(s => s.date !== date);
   data.snapshots.push({ date, dentists: out });

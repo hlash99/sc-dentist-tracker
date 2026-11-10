@@ -16,7 +16,10 @@
  * once a day, to log new reviews with their author, rating, date and opening text.
  *
  * Only a completed full sweep can mark a review missing; a missing review that shows up
- * again in a later sweep is marked restored. Both are logged in `events`.
+ * again in a later sweep is marked restored. Both are logged in `events`, as is an `edited`
+ * event when a known review's stars change or Google re-dates it (its original fields are
+ * kept; changes are appended to that review's `edits`). Every completed full sweep also adds
+ * a line to `sweeps` (fetched vs Google's count), and a drop triggers one sweep, not one per run.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
@@ -110,7 +113,12 @@ async function main() {
   if (!ledger.place?.data_id) ledger.place = await resolveDataId(practice);
 
   const { now, prev } = ourCounts(data, practice);
-  const dropped = now != null && prev != null && now < prev;
+  // Snapshots are per-day and we run twice a day, so "today < yesterday" stays true for every
+  // run on the day of a drop. Once a full sweep has already run today at this count (or lower),
+  // a second one would spend ~11 searches to learn nothing new.
+  const sweptThisDrop = ledger.lastFullSweep === today && ledger.lastFullSweepCount != null
+    && now != null && now >= ledger.lastFullSweepCount;
+  const dropped = now != null && prev != null && now < prev && !sweptThisDrop;
   const stale = !ledger.lastFullSweep || daysBetween(ledger.lastFullSweep, today) >= FULL_SWEEP_DAYS;
   const wantFull = !Object.keys(ledger.reviews).length || dropped || stale;
 
@@ -125,7 +133,7 @@ async function main() {
   if (!mode) { console.log("reviews: already checked today — skipping."); return; }
 
   const seen = new Set();
-  let added = 0, complete = false;
+  let added = 0, restored = 0, edited = 0, complete = false;
   for await (const page of reviewPages(ledger.place.data_id)) {
     let allKnown = page.length > 0;
     for (const r of page) {
@@ -140,6 +148,19 @@ async function main() {
         if (prior.missingSince) {
           ledger.events.push({ date: today, type: "restored", id: r.review_id, author: prior.author, rating: prior.rating, missingSince: prior.missingSince });
           delete prior.missingSince;
+          restored++;
+        }
+        // An edited review keeps its id but Google re-dates it and the stars can change.
+        // The original fields stay as first recorded; each change is appended to `edits`.
+        const cur = prior.edits?.length ? prior.edits[prior.edits.length - 1] : prior;
+        const e = toEntry(r);
+        const ratingChanged = e.rating != null && cur.rating != null && e.rating !== cur.rating;
+        const dateMoved = !!e.date && !!cur.date && e.date > cur.date;   // edits only move a date forward
+        if (ratingChanged || dateMoved) {
+          (prior.edits ||= []).push({ seen: today, date: e.date, rating: e.rating, snippet: e.snippet });
+          ledger.events.push({ date: today, type: "edited", id: r.review_id, author: prior.author,
+            rating: e.rating, prevRating: cur.rating, reviewDate: e.date, prevReviewDate: cur.date });
+          edited++;
         }
       }
     }
@@ -147,7 +168,7 @@ async function main() {
     complete = mode === "full";                       // stays true only if the loop ends naturally
   }
 
-  let removed = 0;
+  let removed = 0, trusted = false;
   if (mode === "full" && complete) {
     // Guard against a truncated sweep marking everything missing.
     const expected = now ?? seen.size;
@@ -155,14 +176,23 @@ async function main() {
       for (const [id, r] of Object.entries(ledger.reviews)) {
         if (!seen.has(id) && !r.missingSince) {
           r.missingSince = today;
-          ledger.events.push({ date: today, type: "removed", id, author: r.author, rating: r.rating, reviewDate: r.date, lastSeen: r.lastSeen });
+          ledger.events.push({ date: today, type: "removed", id, author: r.author, rating: r.rating, reviewDate: r.date, lastSeen: r.lastSeen,
+            fetched: seen.size, googleCount: now });   // sweep context, to judge the finding later
           removed++;
         }
       }
       ledger.lastFullSweep = today;
+      ledger.lastFullSweepCount = now;
+      trusted = true;
     } else {
       console.warn(`reviews: sweep returned only ${seen.size} reviews (expected ~${expected}) — not marking any missing.`);
     }
+  }
+  // Audit trail: one line per completed full sweep, so a later "removed" finding can be weighed
+  // against how many reviews that sweep (and the ones around it) actually returned.
+  if (mode === "full" && complete) {
+    (ledger.sweeps ||= []).push({ date: today, fetched: seen.size, googleCount: now, added, removed, restored,
+      trusted });   // trusted:false = looked truncated, nothing was marked missing
   }
   ledger.lastIncremental = today;   // a full sweep also covers today's incremental check
 
@@ -172,7 +202,7 @@ async function main() {
     .map(([id, r]) => ({ id, author: r.author, rating: r.rating, date: r.date, missingSince: r.missingSince }));
   writeFileSync(LEDGER, JSON.stringify(ledger, null, 2) + "\n");
 
-  console.log(`reviews: ${mode} via serpapi — ${seen.size} fetched, +${added} new, ${removed} newly missing, `
+  console.log(`reviews: ${mode} via serpapi — ${seen.size} fetched, +${added} new, ${edited} edited, ${restored} restored, ${removed} newly missing, `
     + `${ledger.missing.length} missing total, ${Object.keys(ledger.reviews).length} in ledger. searches used: ${searchesUsed}`);
 }
 
