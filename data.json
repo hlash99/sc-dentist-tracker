@@ -18679,7 +18679,7 @@
       "dentists": [
         {
           "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
-          "reviews": 405,
+          "reviews": 406,
           "rating": 5,
           "checked": "2026-11-11"
         },
@@ -18697,7 +18697,7 @@
         },
         {
           "name": "Edgewood Dental",
-          "reviews": 197,
+          "reviews": 198,
           "rating": 5,
           "checked": "2026-11-11"
         },
@@ -18819,7 +18819,7 @@
           "name": "Durk K Hong DDS",
           "reviews": 4,
           "rating": 4.8,
-          "checked": "2026-11-10"
+          "checked": "2026-11-11"
         }
       ]
     }
@@ -18830,26 +18830,26 @@
     "tracked": true,
     "rank": 4,
     "of": 24,
-    "reviews": 197,
+    "reviews": 198,
     "rating": 5,
-    "gain7": 4,
-    "gain30": 14,
+    "gain7": 5,
+    "gain30": 15,
     "rankChange7": 0,
     "next": {
       "name": "Terence G Clancy DDS",
       "reviews": 223,
-      "toPass": 27,
+      "toPass": 26,
       "gain30": 1
     },
     "behind": {
       "name": "Avalon Dental - Dr. Elizabeth Dinh",
       "reviews": 141,
-      "lead": 56,
+      "lead": 57,
       "gain30": 0
     },
     "leader": {
       "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
-      "reviews": 405,
+      "reviews": 406,
       "gap": 208
     },
     "drops": [
