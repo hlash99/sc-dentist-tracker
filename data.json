@@ -18822,34 +18822,183 @@
           "checked": "2026-11-11"
         }
       ]
+    },
+    {
+      "date": "2026-11-12",
+      "dentists": [
+        {
+          "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
+          "reviews": 407,
+          "rating": 5,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 283,
+          "rating": 4.9,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Terence G Clancy DDS",
+          "reviews": 223,
+          "rating": 4.9,
+          "checked": "2026-11-11"
+        },
+        {
+          "name": "Edgewood Dental",
+          "reviews": 199,
+          "rating": 5,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Avalon Dental - Dr. Elizabeth Dinh",
+          "reviews": 141,
+          "rating": 4.9,
+          "checked": "2026-11-11"
+        },
+        {
+          "name": "Marcos & Marcos DDS",
+          "reviews": 106,
+          "rating": 5,
+          "checked": "2026-11-11"
+        },
+        {
+          "name": "Yenba Bui Sing, DMD",
+          "reviews": 106,
+          "rating": 5,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 105,
+          "rating": 5,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Valerie Gilman, DDS - San Carlos",
+          "reviews": 105,
+          "rating": 4.9,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Klebaner Alek DDS",
+          "reviews": 90,
+          "rating": 5,
+          "checked": "2026-11-11"
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 89,
+          "rating": 4.8,
+          "checked": "2026-11-11"
+        },
+        {
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 52,
+          "rating": 4.9,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Chow & Ysaac Family Dentistry",
+          "reviews": 26,
+          "rating": 5,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "John A. Boghossian, DDS",
+          "reviews": 24,
+          "rating": 4.8,
+          "checked": "2026-11-10"
+        },
+        {
+          "name": "City Dental Group San Carlos",
+          "reviews": 23,
+          "rating": 4.8,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Dr. Melinda Reynard, DDS",
+          "reviews": 15,
+          "rating": 4.9,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Nancy Ruth Kaher, D.D.S.",
+          "reviews": 13,
+          "rating": 5,
+          "checked": "2026-11-11"
+        },
+        {
+          "name": "Laurel Dental San Carlos",
+          "reviews": 12,
+          "rating": 4.3,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Urgent Dental Service",
+          "reviews": 12,
+          "rating": 4.3,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Dr. Carliza A. Marcos, DDS",
+          "reviews": 8,
+          "rating": 5,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Aashvi Smiles Dental Group",
+          "reviews": 7,
+          "rating": 5,
+          "checked": "2026-11-10"
+        },
+        {
+          "name": "Dr. Robert J. Pelzar, DMD",
+          "reviews": 7,
+          "rating": 4.7,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Laurel Street Smiles",
+          "reviews": 6,
+          "rating": 5,
+          "checked": "2026-11-10"
+        },
+        {
+          "name": "Durk K Hong DDS",
+          "reviews": 4,
+          "rating": 4.8,
+          "checked": "2026-11-11"
+        }
+      ]
     }
   ],
   "summary": {
-    "asOf": "2026-11-11",
+    "asOf": "2026-11-12",
     "practice": "Edgewood Dental",
     "tracked": true,
     "rank": 4,
     "of": 24,
-    "reviews": 198,
+    "reviews": 199,
     "rating": 5,
-    "gain7": 5,
-    "gain30": 15,
+    "gain7": 4,
+    "gain30": 16,
     "rankChange7": 0,
     "next": {
       "name": "Terence G Clancy DDS",
       "reviews": 223,
-      "toPass": 26,
+      "toPass": 25,
       "gain30": 1
     },
     "behind": {
       "name": "Avalon Dental - Dr. Elizabeth Dinh",
       "reviews": 141,
-      "lead": 57,
+      "lead": 58,
       "gain30": 0
     },
     "leader": {
       "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
-      "reviews": 406,
+      "reviews": 407,
       "gap": 208
     },
     "drops": [
@@ -18860,10 +19009,10 @@
       }
     ],
     "ledger": {
-      "listed": 198,
+      "listed": 200,
       "missing": 0,
       "lastFullSweep": "2026-11-07",
-      "lastCheck": "2026-11-11",
+      "lastCheck": "2026-11-12",
       "removed30": 0,
       "restored30": 0,
       "edited30": 0
