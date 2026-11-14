@@ -19120,17 +19120,166 @@
           "checked": "2026-11-12"
         }
       ]
+    },
+    {
+      "date": "2026-11-14",
+      "dentists": [
+        {
+          "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
+          "reviews": 407,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Frank Hsu, DDS",
+          "reviews": 284,
+          "rating": 4.9,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Terence G Clancy DDS",
+          "reviews": 223,
+          "rating": 4.9,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Edgewood Dental",
+          "reviews": 199,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Avalon Dental - Dr. Elizabeth Dinh",
+          "reviews": 141,
+          "rating": 4.9,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Marcos & Marcos DDS",
+          "reviews": 106,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Yenba Bui Sing, DMD",
+          "reviews": 106,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Chestnut Dental Care",
+          "reviews": 105,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Valerie Gilman, DDS - San Carlos",
+          "reviews": 105,
+          "rating": 4.9,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Klebaner Alek DDS",
+          "reviews": 90,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Held and Lau DDS",
+          "reviews": 89,
+          "rating": 4.8,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Dr. Dipty P. Parikh, DDS",
+          "reviews": 52,
+          "rating": 4.9,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Chow & Ysaac Family Dentistry",
+          "reviews": 26,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "John A. Boghossian, DDS",
+          "reviews": 25,
+          "rating": 4.8,
+          "checked": "2026-11-13"
+        },
+        {
+          "name": "City Dental Group San Carlos",
+          "reviews": 23,
+          "rating": 4.8,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Dr. Melinda Reynard, DDS",
+          "reviews": 15,
+          "rating": 4.9,
+          "checked": "2026-11-13"
+        },
+        {
+          "name": "Nancy Ruth Kaher, D.D.S.",
+          "reviews": 13,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Laurel Dental San Carlos",
+          "reviews": 12,
+          "rating": 4.3,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Urgent Dental Service",
+          "reviews": 12,
+          "rating": 4.3,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Dr. Carliza A. Marcos, DDS",
+          "reviews": 8,
+          "rating": 5,
+          "checked": "2026-11-14"
+        },
+        {
+          "name": "Aashvi Smiles Dental Group",
+          "reviews": 7,
+          "rating": 5,
+          "checked": "2026-11-13"
+        },
+        {
+          "name": "Dr. Robert J. Pelzar, DMD",
+          "reviews": 7,
+          "rating": 4.7,
+          "checked": "2026-11-12"
+        },
+        {
+          "name": "Laurel Street Smiles",
+          "reviews": 6,
+          "rating": 5,
+          "checked": "2026-11-13"
+        },
+        {
+          "name": "Durk K Hong DDS",
+          "reviews": 4,
+          "rating": 4.8,
+          "checked": "2026-11-12"
+        }
+      ]
     }
   ],
   "summary": {
-    "asOf": "2026-11-13",
+    "asOf": "2026-11-14",
     "practice": "Edgewood Dental",
     "tracked": true,
     "rank": 4,
     "of": 24,
     "reviews": 199,
     "rating": 5,
-    "gain7": 3,
+    "gain7": 2,
     "gain30": 14,
     "rankChange7": 0,
     "next": {
@@ -19158,14 +19307,21 @@
       }
     ],
     "ledger": {
-      "listed": 200,
-      "missing": 0,
-      "lastFullSweep": "2026-11-07",
-      "lastCheck": "2026-11-13",
-      "removed30": 0,
+      "listed": 199,
+      "missing": 1,
+      "lastFullSweep": "2026-11-14",
+      "lastCheck": "2026-11-14",
+      "removed30": 1,
       "restored30": 0,
       "edited30": 1
     },
-    "alerts": []
+    "alerts": [
+      {
+        "type": "reviews_missing",
+        "level": "warn",
+        "date": "2026-11-14",
+        "text": "1 review no longer listed on Google (since 2026-11-14)"
+      }
+    ]
   }
 }
