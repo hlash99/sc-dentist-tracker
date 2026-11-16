@@ -19424,7 +19424,7 @@
       "dentists": [
         {
           "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
-          "reviews": 407,
+          "reviews": 408,
           "rating": 5,
           "checked": "2026-11-16"
         },
@@ -19552,7 +19552,7 @@
           "name": "Dr. Robert J. Pelzar, DMD",
           "reviews": 7,
           "rating": 4.7,
-          "checked": "2026-11-15"
+          "checked": "2026-11-16"
         },
         {
           "name": "Laurel Street Smiles",
@@ -19594,8 +19594,8 @@
     },
     "leader": {
       "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
-      "reviews": 407,
-      "gap": 208
+      "reviews": 408,
+      "gap": 209
     },
     "drops": [
       {
