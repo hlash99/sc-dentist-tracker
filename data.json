@@ -19740,7 +19740,7 @@
         },
         {
           "name": "Edgewood Dental",
-          "reviews": 199,
+          "reviews": 200,
           "rating": 5,
           "checked": "2026-11-18"
         },
@@ -19776,7 +19776,7 @@
         },
         {
           "name": "Klebaner Alek DDS",
-          "reviews": 90,
+          "reviews": 91,
           "rating": 5,
           "checked": "2026-11-18"
         },
@@ -19862,7 +19862,7 @@
           "name": "Durk K Hong DDS",
           "reviews": 4,
           "rating": 4.8,
-          "checked": "2026-11-16"
+          "checked": "2026-11-18"
         }
       ]
     }
@@ -19873,27 +19873,27 @@
     "tracked": true,
     "rank": 4,
     "of": 24,
-    "reviews": 199,
+    "reviews": 200,
     "rating": 5,
-    "gain7": 1,
-    "gain30": 13,
+    "gain7": 2,
+    "gain30": 14,
     "rankChange7": 0,
     "next": {
       "name": "Terence G Clancy DDS",
       "reviews": 223,
-      "toPass": 25,
+      "toPass": 24,
       "gain30": 1
     },
     "behind": {
       "name": "Avalon Dental - Dr. Elizabeth Dinh",
       "reviews": 141,
-      "lead": 58,
+      "lead": 59,
       "gain30": 0
     },
     "leader": {
       "name": "Donald J. Curia, DDS & Beverley Chiang, DDS",
       "reviews": 409,
-      "gap": 210
+      "gap": 209
     },
     "drops": [
       {
