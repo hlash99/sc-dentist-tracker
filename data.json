@@ -19883,7 +19883,7 @@
         },
         {
           "name": "Terence G Clancy DDS",
-          "reviews": 223,
+          "reviews": 224,
           "rating": 4.9,
           "checked": "2026-11-19"
         },
@@ -19999,7 +19999,7 @@
           "name": "Dr. Robert J. Pelzar, DMD",
           "reviews": 7,
           "rating": 4.7,
-          "checked": "2026-11-18"
+          "checked": "2026-11-19"
         },
         {
           "name": "Laurel Street Smiles",
@@ -20029,9 +20029,9 @@
     "rankChange7": 0,
     "next": {
       "name": "Terence G Clancy DDS",
-      "reviews": 223,
-      "toPass": 24,
-      "gain30": 1
+      "reviews": 224,
+      "toPass": 25,
+      "gain30": 2
     },
     "behind": {
       "name": "Avalon Dental - Dr. Elizabeth Dinh",
